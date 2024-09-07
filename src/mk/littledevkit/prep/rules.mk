@@ -7,9 +7,11 @@ build/install-github-%.task: ## Installs the given Github repo in the form USER@
 	USERNAME="$(firstword $(subst @,$(SPACE),$*))"
 	REPONAME="$(lastword $(subst @,$(SPACE),$*))"
 	mkdir -p deps
-	if ! $(GIT) clone "git@github.com:$$USERNAME/$$REPONAME.git" "deps/$$REPONAME"; do
-		exit 1
-	}
+	if [ ! -e "deps/$$REPONAME" ]; then
+		if ! $(GIT) clone "git@github.com:$$USERNAME/$$REPONAME.git" "deps/$$REPONAME"; then
+			exit 1
+		fi
+	fi
 	if [ -e "deps/$$REPONAME/bin/$$REPONAME" ]; then
 		mkdir -p run/bin
 		ln -sfr "deps/$$REPONAME/bin/$$REPONAME" "run/bin/$$REPONAME"

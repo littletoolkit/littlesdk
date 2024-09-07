@@ -48,22 +48,49 @@ COLOR_CRITICAL        :=$(call termcap,setaf 163)
 
 # -----------------------------------------------------------------------------
 #
+# RULE FUNCTION
+#
+# -----------------------------------------------------------------------------
+
+define rule-pre-cmd
+	case "$@" in
+		*/*)
+			if [ -n "$(dir $@)" ] && [ ! -e "$(dir $@)" ]; then
+				mkdir -p "$(dir $@)"
+			fi
+			echo "$(call fmt-action,Make $(call fmt-path,$@))"
+		;;
+		*run*)
+			echo "$(call fmt-action,Start $(call fmt-rule,$@)…)"
+			;;
+		*)
+			echo "$(call fmt-action,Start $(call fmt-rule,$@))"
+		;;
+	esac
+endef
+
+# -----------------------------------------------------------------------------
+#
 # FILE FUNCTIONS
 #
 # -----------------------------------------------------------------------------
 
 # --
-#  `rwildcard PATH PATTERN`, eg `$(call rwildcard,src/py,*.py)` will match all
+#  `file-find PATH PATTERN`, eg `$(call file-find,src/py,*.py)` will match all
 #  files in `PATH` (recursively) and also matching patterns.
-rwildcard=$(wildcard $(subst SUF,$(strip $(if $2,$2,.)),$(strip $(subst PRE,$(if $1,$1,.)),PRE/SUF PRE/*/SUF PRE/*/*/SUF PRE/*/*/*/SUF PRE/*/*/*/*/SUF PRE/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/*/*/SUF)))
+file-find=$(wildcard $(subst SUF,$(strip $(if $2,$2,.)),$(strip $(subst PRE,$(if $1,$1,.)),PRE/SUF PRE/*/SUF PRE/*/*/SUF PRE/*/*/*/SUF PRE/*/*/*/*/SUF PRE/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/*/*/SUF)))
 
 # -----------------------------------------------------------------------------
 #
-# LOGGING FUNCTIONS
+# FORMATTING FUNCTIONS
 #
 # -----------------------------------------------------------------------------
-fmt-tip=$(SPACE)👉   $(COLOR_INFO)$1$(RESET)
 
-
+fmt-prefix=$(BOLD)$(FMT_PREFIX)$(RESET)
+fmt-tip   =$(call fmt-prefix)$(SPACE)👉   $1$(RESET)
+fmt-action=$(call fmt-prefix)  →  $1$(RESET)
+fmt-path=$(dir $1)/$(BOLD)$(notdir $1)$(RESET)
+fmt-module=$(lastword $(strip $(subst /,$(SPACE),$(dir $1))))/$(BOLD)$(notdir $1)$(RESET)
+fmt-rule=$(BOLD)@$1$(RESET)
 
 # EOF

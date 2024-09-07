@@ -6,6 +6,10 @@ PACKAGE_ALL?=## All the files that will be packaged in distributions
 DIST_ALL?=## All the distribution files
 
 # --
+# The prefix used in logging output
+FMT_PREFIX?=[kit]
+
+# --
 # Lists all source files defined in the modules like `std/lib.mk std/vars.mk`
 KIT_MODULES_SOURCES:=$(patsubst $(KIT_MODULES_PATH)/%,%,$(wildcard $(KIT_MODULES_PATH)/*/*.mk))
 
