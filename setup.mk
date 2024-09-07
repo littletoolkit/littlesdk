@@ -2,18 +2,26 @@
 # Sets up LittleDevKit with the given version based on the current directory
 LITTLE_DEVKIT_VERSION=main
 LDK_PATH:=$(dir $(lastword $(MAKEFILE_LIST)))
+LDK_FLAGS?=
+ifeq ($(filter no-check-version,$(LDK_FLAGS)),)
+$(info $(shell env MAKEFLAGS="--silent" make -f $(LDK_PATH)/setup.mk check-version LDK_FLAGS=no-check-version))
+include LDK_PATH/src/mk/littledevkit.mk
+endif
 
-.PHONY: setup
-setup:
-
+# --
+# Checks the version for littledevkit
 .PHONY: check-version
 check-version:
-	@echo $(LDK_PATH)
-	THIS_VERSION=$$(git -C $(LDK_PATH) rev-parse HEAD)
-	EXPECT_VERSION=$$(git -C $(LDK_PATH) rev-parse $(LITTLE_DEVKIT_VERSION))
-	if [ "$$THIS_VERSION" != "$$EXPECT_VERSION" ]; then
-		echo "--- Checking out version: $(LITTLE_DEVKIT_VERSION) $$EXPECT_VERSION (has $$THIS_VERSION)"
-	fi
+	@
+	if (eq "" "$(filter no-check-version,$(LDK_FLAGS))") {
+		var this_version = (git -C $(LDK_PATH) rev-parse HEAD)
+		var that_version = (git -C $(LDK_PATH) rev-parse $(LITTLE_DEVKIT_VERSION))
+		if (not (eq $$this_version $$that_version)) {
+			echo "--- LDK is at $$that_version [$(LITTLE_DEVKIT_VERSION)] (was $$this_version)"
+		} else {
+			echo "--- LDK is at $$that_version [$(LITTLE_DEVKIT_VERSION)]"
+		}
+	}
 
 .ONESHELL:
 # EOF
