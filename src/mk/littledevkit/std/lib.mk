@@ -8,6 +8,15 @@ endef
 
 # -----------------------------------------------------------------------------
 #
+# ARGS
+#
+# -----------------------------------------------------------------------------
+1?=
+2?=
+3?=
+
+# -----------------------------------------------------------------------------
+#
 # COLORS
 #
 # -----------------------------------------------------------------------------
@@ -58,13 +67,13 @@ define rule-pre-cmd
 			if [ -n "$(dir $@)" ] && [ ! -e "$(dir $@)" ]; then
 				mkdir -p "$(dir $@)"
 			fi
-			echo "$(call fmt-action,Make $(call fmt-path,$@))"
+			echo "$(call fmt-action,Make $(call fmt-path,$@)) 🖫"
 		;;
 		*run*)
-			echo "$(call fmt-action,Start $(call fmt-rule,$@)…)"
+			echo "$(call fmt-action,Does $(call fmt-rule,$@)) …"
 			;;
 		*)
-			echo "$(call fmt-action,Start $(call fmt-rule,$@))"
+			echo "$(call fmt-action,Done $(call fmt-rule,$@)) ✔ "
 		;;
 	esac
 endef
@@ -89,8 +98,8 @@ file-find=$(wildcard $(subst SUF,$(strip $(if $2,$2,.)),$(strip $(subst PRE,$(if
 fmt-prefix=$(BOLD)$(FMT_PREFIX)$(RESET)
 fmt-tip   =$(call fmt-prefix)$(SPACE)👉   $1$(RESET)
 fmt-action=$(call fmt-prefix)  →  $1$(RESET)
-fmt-path=$(dir $1)/$(BOLD)$(notdir $1)$(RESET)
-fmt-module=$(lastword $(strip $(subst /,$(SPACE),$(dir $1))))/$(BOLD)$(notdir $1)$(RESET)
-fmt-rule=$(BOLD)@$1$(RESET)
+fmt-path=🗅  $(dir $1)/$(BOLD)$(notdir $1)$(RESET)
+fmt-module=🖸  $(lastword $(strip $(subst /,$(SPACE),$(dir $1))))/$(BOLD)$(notdir $1)$(RESET)
+fmt-rule=$(if $2,$2,➳)  $(BOLD)$1$(RESET)
 
 # EOF

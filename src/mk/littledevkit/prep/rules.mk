@@ -1,11 +1,12 @@
 .PHONY: prep
 prep: $(PREP_ALL) ## Explicitly resolves $(PREP_ALL)
-	@
+	@$(call rule-pre-cmd)
 
-build/install-github-%.task: ## Installs the given Github repo in the form USER@REPO
-	@mkdir -p "$(dir $@)"
-	USERNAME="$(firstword $(subst @,$(SPACE),$*))"
-	REPONAME="$(lastword $(subst @,$(SPACE),$*))"
+build/install-github-%.task: ## Installs the given Github repo in the form USER/REPO@VERSION
+	@$(call rule-pre-cmd)
+	USERNAME="$(firstword $(subst /,$(SPACE),$*))"
+	REPONAME="$(firstword $(subst @,$(SPACE),$(lastword $(subst /,$(SPACE),$*))))"
+	REVISION="$(lastword  $(subst @,$(SPACE),$(lastword $(subst /,$(SPACE),$*))))"
 	mkdir -p deps
 	if [ ! -e "deps/$$REPONAME" ]; then
 		if ! $(GIT) clone "git@github.com:$$USERNAME/$$REPONAME.git" "deps/$$REPONAME"; then
@@ -23,7 +24,7 @@ build/install-github-%.task: ## Installs the given Github repo in the form USER@
 
 
 build/install-python-%.task: ## Installs the given Python module for the given version
-	@mkdir -p "$(dir $@)"
+	@$(call rule-pre-cmd)
 	MODULE="$(firstword $(subst @,$(SPACE),$*))"
 	VERSION="$(lastword $(subst @,$(SPACE),$*))"
 	if [ -n "$$VERSION" ]; then

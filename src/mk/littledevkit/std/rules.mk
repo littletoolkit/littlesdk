@@ -1,15 +1,17 @@
 help: ## This command
-	@cat << EOF
-	🧰 $(BOLD)LittleDevKit$(RESET) phases:
-	▸ $(BOLD)prep$(RESET)     ― Installs dependencies & prepares environment
-	▸ $(BOLD)build$(RESET)    ― Builds all the assets required to run and distribute
-	▸ $(BOLD)run$(RESET)      ― Runs the project and its dependencies
-	▸ $(BOLD)dist$(RESET)     ― Creates distributions of the project
-	▸ $(BOLD)deploy$(RESET)   ― Deploys the project on an infrastructure
-	▸ $(BOLD)release$(RESET)  ― Finalise a deployment so that it is in production
+	@$(call rule-pre-cmd)
+	cat << EOF
+	…
+	📖 $(BOLD)LittleDevKit$(RESET) phases:
+	$(call fmt-rule,prep)     ― Installs dependencies & prepares environment
+	$(call fmt-rule,build)    ― Builds all the assets required to run and distribute
+	$(call fmt-rule,run)      ― Runs the project and its dependencies
+	$(call fmt-rule,dist)     ― Creates distributions of the project
+	$(call fmt-rule,deploy)   ― Deploys the project on an infrastructure
+	$(call fmt-rule,release)  ― Finalise a deployment so that it is in production
 	―
-	▸ $(BOLD)check$(RESET)    ― Lints, audits and formats the code
-	▸ $(BOLD)test$(RESET)     ― Runs tests
+	$(call fmt-rule,check)    ― Lints, audits and formats the code
+	$(call fmt-rule,test)     ― Runs tests
 	EOF
 	echo ""
 	echo "Available $(BOLD)rules$(RESET):"
@@ -17,14 +19,14 @@ help: ## This command
 	for SRC in $(filter %/rules.mk,std/rules.mk $(KIT_MODULES_SOURCES)); do
 		while read -r line; do
 			rule=$${line%%:*}
-			fmt_line="▸ $$(dirname $$SRC)"$$'\t'"$(BOLD)$$rule$(RESET) → $${line##*##}" # NOHELP
+			origin=`printf "%-11.11s" $$(dirname $$SRC)`
 			case "$$rule" in
 				*/*)
-					dev_rules+=("$$fmt_line")
+					dev_rules+=("$$origin $(call fmt-rule,$$rule,🗅) ―$${line##*##}") # NOHELP
 					dev_rules+=("EOL")
 					;;
 				*)
-					echo "$$fmt_line"
+					echo "$$origin $(call fmt-rule,$$rule) ―$${line##*##}" # NOHELP
 					;;
 			esac
 		done < <(grep '##' $(KIT_MODULES_PATH)/$$SRC | grep -v NOHELP) # NOHELP

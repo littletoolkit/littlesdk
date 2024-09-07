@@ -20,4 +20,18 @@ NO_INTERACTIVE?=
 
 ## Removes color output
 NO_COLOR?=
+
+## List of Github nodules to use in the form REPO/USER[@BRANCH]
+USE_GITHUB?=
+## List of Python nodules to use in the form MODULE[=VERSION]
+USE_PYTHON?=
+## List of Node nodules to use in the form MODULE[=VERSION]
+USE_NODE?=
+
+PREP_ALL+=\
+	$(foreach M,$(USE_GITHUB),build/install-github-$M.task)\
+	$(foreach M,$(USE_PYTHON),build/install-python-$M.task)\
+	$(foreach M,$(USE_NODE),build/install-node-$M.task)
+
+
 # EOF
