@@ -1,11 +1,15 @@
 # --
-# Sets up LittleDevKit with the given version based on the current directory
+# Sets up LittleDevKit with the given version based on the current directory.
+# This makefile is the front door to sourcing `littledevkit` and ensuring that
+# it has the correct version.
+
 LITTLE_DEVKIT_VERSION=main
-LDK_PATH:=$(dir $(lastword $(MAKEFILE_LIST)))
+SHELL:=elvish
+LDK_PATH:=$(subst //,,$(dir $(lastword $(MAKEFILE_LIST)))/)
 LDK_FLAGS?=
 ifeq ($(filter no-check-version,$(LDK_FLAGS)),)
 $(info $(shell env MAKEFLAGS="--silent" make -f $(LDK_PATH)/setup.mk check-version LDK_FLAGS=no-check-version))
-include LDK_PATH/src/mk/littledevkit.mk
+include $(LDK_PATH)/src/mk/littledevkit.mk
 endif
 
 # --
@@ -13,7 +17,7 @@ endif
 .PHONY: check-version
 check-version:
 	@
-	if (eq "" "$(filter no-check-version,$(LDK_FLAGS))") {
+	if (eq "" "$(filter no-check-version,$(LDK_FLAGS))" ) {
 		var this_version = (git -C $(LDK_PATH) rev-parse HEAD)
 		var that_version = (git -C $(LDK_PATH) rev-parse $(LITTLE_DEVKIT_VERSION))
 		if (not (eq $$this_version $$that_version)) {
