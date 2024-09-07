@@ -7,12 +7,12 @@ cloudflare-start-wrangler: $(PREP_ALL) build/cloudflare-login-wrangler.task ## S
 
 .PHONY: cloudflare-deploy-pages
 cloudflare-deploy-pages: build/cloudflare-deploy-pages.task ## Deploys Cloudlare pages
-build/cloudflare-deploy-pages.task:
+
+build/cloudflare-deploy-pages.task: build/cloudflare-login-wrangler.task
 	@$(WRANGLER) pages deploy $(CLOUDFLARE_PAGES_PATH)  && touch "$@"
 
-#
-# build/cloudflare-login-wrangler.task: build/install-node-wrangler.task ## Installs and login Wrangler
-# 	@mkdir -p "$(dir $@)"
-# 	$(WRANGLER) login  && touch "$@"
+build/cloudflare-login-wrangler.task: build/install-node-wrangler.task ## DEV: Installs and login Wrangler
+	@mkdir -p "$(dir $@)"
+	$(WRANGLER) login  && touch "$@"
 
 # EOF
