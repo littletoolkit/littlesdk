@@ -4,8 +4,15 @@ cloudflare-start-wrangler: $(PREP_ALL) build/cloudflare-login-wrangler.task ## S
 	# NOTE: There's a `dev --local` mode as well
 	$(WRANGLER) dev --ip 0.0.0.0 --port $(WRANGLER_PORT)
 
-build/cloudflare-login-wrangler.task: build/install-node-wrangler.task ## Installs and login Wrangler
-	@mkdir -p "$(dir $@)"
-	$(WRANGLER) login  && touch "$@"
+
+.PHONY: cloudflare-deploy-pages
+cloudflare-deploy-pages: build/cloudflare-deploy-pages.task ## Deploys Cloudlare pages
+build/cloudlare-deploy-pages.task:
+	@$(WRANGLER) pages deploy $(CLOUDFLARE_PAGES_PATH)  && touch "$@"
+
+#
+# build/cloudflare-login-wrangler.task: build/install-node-wrangler.task ## Installs and login Wrangler
+# 	@mkdir -p "$(dir $@)"
+# 	$(WRANGLER) login  && touch "$@"
 
 # EOF

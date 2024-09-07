@@ -54,6 +54,6 @@ COLOR_CRITICAL        :=$(call term-style,setaf 163)
 # --
 #  `rwildcard PATH PATTERN`, eg `$(call rwildcard,src/py,*.py)` will match all
 #  files in `PATH` (recursively) and also matching patterns.
-rwildcard=$(wildcard $(subst SUF,$2,$(subst PRE,$(if $1,$1,.),PRE/SUF PRE/*/SUF PRE/*/*/SUF PRE/*/*/*/SUF PRE/*/*/*/*/SUF PRE/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/*/*/SUF)))
+rwildcard=$(wildcard $(subst SUF,$(strip $(if $2,$2,.)),$(strip $(subst PRE,$(if $1,$1,.)),PRE/SUF PRE/*/SUF PRE/*/*/SUF PRE/*/*/*/SUF PRE/*/*/*/*/SUF PRE/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/*/*/SUF)))
 
 # EOF

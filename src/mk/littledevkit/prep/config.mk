@@ -1,14 +1,23 @@
-GIT?=git ## Alias to Git
+## Alias to Git
+GIT?=git
+## Current Python version
+PYTHON_VERSION?=3.12
 
-PYTHON_VERSION?=3.12  ## Current Python version
-PYTHON?=python$(PYTHON_VERSION) ## Python interpreter
+## Python interpreter
+PYTHON?=python$(PYTHON_VERSION)
 
-NODE_VERSION?=22 ## Default NodeJS version
-NODE?=node$(if $(NODE_VERSION),-$(NODE_VERSION)) ## Node command alias
+## Default NodeJS version
+NODE_VERSION?=22
 
-NPM?=npm$(if $(NODE_VERSION),-$(NODE_VERSION)) ## NPM command alias
+## Node command alias
+NODE?=node$(if $(NODE_VERSION),-$(NODE_VERSION))
 
+## NPM command alias
+NPM?=npm$(if $(NODE_VERSION),-$(NODE_VERSION))
 
-NO_INTERACTIVE?=## Forces non-interactive mode
-NO_COLOR?=## Removes color output
+## Forces non-interactive mode
+NO_INTERACTIVE?=
+
+## Removes color output
+NO_COLOR?=
 # EOF
