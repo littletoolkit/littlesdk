@@ -1,21 +1,14 @@
-# --
-# Configures the default Git command
-GIT?=git
+GIT?=git ## Alias to Git
 
-# --
-# Configures the default version of Python
-PYTHON_VERSION?=3.12
-PYTHON?=python$(PYTHON_VERSION)
+PYTHON_VERSION?=3.12  ## Current Python version
+PYTHON?=python$(PYTHON_VERSION) ## Python interpreter
 
-# --
-# Configures the version of the NodeJS command.
-NODE_VERSION?=22
-# --
-# Configures the `node` command alias.
-NODE?=node$(if $(NODE_VERSION),-$(NODE_VERSION))
+NODE_VERSION?=22 ## Default NodeJS version
+NODE?=node$(if $(NODE_VERSION),-$(NODE_VERSION)) ## Node command alias
 
-# --
-# Configures the `npm` command alias.
-NPM?=npm$(if $(NODE_VERSION),-$(NODE_VERSION))
+NPM?=npm$(if $(NODE_VERSION),-$(NODE_VERSION)) ## NPM command alias
 
+
+NO_INTERACTIVE?=## Forces non-interactive mode
+NO_COLOR?=## Removes color output
 # EOF
