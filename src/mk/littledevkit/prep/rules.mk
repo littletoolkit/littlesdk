@@ -23,12 +23,14 @@ build/install-python-%.task: ## Installs the given Python module for the given v
 	if [ -n "$$VERSION" ]; then
 		MODULE+="--$$VERSION"
 	fi
-	$(PYTHON) -m pip install --user -U "$$MODULE"
-	touch "$@"
+	if $(PYTHON) -m pip install --user -U "$$MODULE"; then
+		touch "$@"
+	fi
 
 build/install-node-%.task: ## Installs the given Node module
 	@mkdir -p "$(dir $@)"
-	$(NODE_PACKAGER) install  "$*"
-	touch "$@"
+	if $(NPM) install  "$*"; then
+		touch "$@"
+	fi
 
 # EOF
