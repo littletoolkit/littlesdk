@@ -1,3 +1,7 @@
+.PHONY: prep
+prep: $(PREP_ALL) ## Explicitly resolves $(PREP_ALL)
+	@
+
 build/install-github-%.task: ## Installs the given Github repo in the form USER@REPO
 	@mkdir -p "$(dir $@)"
 	USERNAME="$(firstword $(subst @,$(SPACE),$*))"

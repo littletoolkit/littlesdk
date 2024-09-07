@@ -7,7 +7,7 @@ cloudflare-start-wrangler: $(PREP_ALL) build/cloudflare-login-wrangler.task ## S
 
 .PHONY: cloudflare-deploy-pages
 cloudflare-deploy-pages: build/cloudflare-deploy-pages.task ## Deploys Cloudlare pages
-build/cloudlare-deploy-pages.task:
+build/cloudflare-deploy-pages.task:
 	@$(WRANGLER) pages deploy $(CLOUDFLARE_PAGES_PATH)  && touch "$@"
 
 #
