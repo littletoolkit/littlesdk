@@ -31,7 +31,8 @@ USE_NODE?=
 PREP_ALL+=\
 	$(foreach M,$(USE_GITHUB),build/install-github-$M.task)\
 	$(foreach M,$(USE_PYTHON),build/install-python-$M.task)\
-	$(foreach M,$(USE_NODE),build/install-node-$M.task)
+	$(foreach M,$(USE_NODE),build/install-node-$M.task)\
+	$(SOURCES_ETC:src/etc/%=%)
 
 
 # EOF

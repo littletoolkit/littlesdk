@@ -53,11 +53,18 @@ help-vars: ## Shows available configuration variables
 	echo "$(call fmt-tip,Run the following to see the value of the variable: $(BOLD)make print-VARNAME$(DIM))"
 
 clean: ## Cleans the project, removing build and run files
-	for dir in build run dist; then
+	@$(call rule-pre-cmd)
+	for dir in build run dist; do
 		if [ -e "$$dir" ]; then
-			echo "$(fmt-action,Cleaning up directory: $(call fmt-path,$$dir))"
-			echo rm -rf "$$dir"
+			echo "$(call fmt-action,Cleaning up directory: $(call fmt-path,$$dir))"
+			rm -rf "$$dir"
 		fi
-	fi
+	done
+
+print-%:
+	@$(info $(BOLD)$*=$(RESET)$(EOL)$(strip $($*))$(EOL)$(BOLD)END$(RESET))
+
+def-%:
+	@$(info $(BOLD)$*=$(RESET)$(EOL)$(value $*)$(EOL)$(BOLD)END$(RESET))
 
 # EOF

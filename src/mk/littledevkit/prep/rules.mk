@@ -35,9 +35,17 @@ build/install-python-%.task: ## Installs the given Python module for the given v
 	fi
 
 build/install-node-%.task: ## Installs the given Node module
-	@mkdir -p "$(dir $@)"
+	@$(call rule-pre-cmd)
 	if $(NPM) install  "$*"; then
 		touch "$@"
 	fi
+
+# =============================================================================
+# CONFIG
+# =============================================================================
+
+%: src/etc/%
+	@$(call rule-pre-cmd)
+	ln -sfr "$<" "$@"
 
 # EOF

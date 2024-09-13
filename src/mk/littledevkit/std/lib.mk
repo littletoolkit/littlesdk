@@ -69,13 +69,17 @@ define rule-pre-cmd
 			fi
 			echo "$(call fmt-action,Make $(call fmt-path,$@)) 🖫"
 		;;
-		*run*)
+		*run*|*clean*)
 			echo "$(call fmt-action,Does $(call fmt-rule,$@)) …"
 			;;
 		*)
 			echo "$(call fmt-action,Done $(call fmt-rule,$@)) ✔ "
 		;;
 	esac
+endef
+
+define rule-post-cmd
+	echo "       ⤷  $(if $1,🗅 × $(words $1) : $(BOLD)$(strip $1),$@)$(RESET)"
 endef
 
 # -----------------------------------------------------------------------------
@@ -87,8 +91,7 @@ endef
 # --
 #  `file-find PATH PATTERN`, eg `$(call file-find,src/py,*.py)` will match all
 #  files in `PATH` (recursively) and also matching patterns.
-file-find=$(wildcard $(subst SUF,$(strip $(if $2,$2,.)),$(strip $(subst PRE,$(if $1,$1,.)),PRE/SUF PRE/*/SUF PRE/*/*/SUF PRE/*/*/*/SUF PRE/*/*/*/*/SUF PRE/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/*/*/SUF)))
-
+file-find=$(wildcard $(subst SUF,$(strip $(if $2,$2,.)),$(strip $(subst PRE,$(if $1,$1,.),PRE/SUF PRE/*/SUF PRE/*/*/SUF PRE/*/*/*/SUF PRE/*/*/*/*/SUF PRE/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/*/*/SUF))))
 # -----------------------------------------------------------------------------
 #
 # FORMATTING FUNCTIONS
@@ -98,7 +101,7 @@ file-find=$(wildcard $(subst SUF,$(strip $(if $2,$2,.)),$(strip $(subst PRE,$(if
 fmt-prefix=$(BOLD)$(FMT_PREFIX)$(RESET)
 fmt-tip   =$(call fmt-prefix)$(SPACE)👉   $1$(RESET)
 fmt-action=$(call fmt-prefix)  →  $1$(RESET)
-fmt-path=🗅  $(dir $1)/$(BOLD)$(notdir $1)$(RESET)
+fmt-path=🗅  $(dir $1)$(BOLD)$(notdir $1)$(RESET)
 fmt-module=🖸  $(lastword $(strip $(subst /,$(SPACE),$(dir $1))))/$(BOLD)$(notdir $1)$(RESET)
 fmt-rule=$(if $2,$2,➳)  $(BOLD)$1$(RESET)
 
