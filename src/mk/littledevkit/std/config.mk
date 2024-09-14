@@ -14,13 +14,14 @@ SOURCES_JS=$(call file-find,src/js,*.js) ## List of JavaScript sources
 SOURCES_PY=$(call file-find,src/js,*.py) ## List of Python sources
 SOURCES_HTML=$(call file-find,src/html,*.html) ## List of HTML sources
 SOURCES_CSS=$(call file-find,src/css,*.css) ## List of CSS sources
+SOURCES_CSS_JS=$(call file-find,src/css,*.js) ## List of CSS/JS sources
 SOURCES_XML=$(call file-find,src/xml,*.xml) ## List of XML sources
 SOURCES_XSLT=$(call file-find,src/xslt,*.xslt) ## List of XSLT sources
 SOURCES_JSON=$(call file-find,src/json,*.json) ## List of JSON sources
 SOURCES_MD=$(call file-find,src/md,*.md) ## List of JSON sources
 SOURCES_ETC=$(call file-find,src/etc,*) ## List of JSON sources
 ifeq ($(SOURCES_ALL),)
-SOURCES_ALL+=$(foreach _,JS PY HTML CSS XML XSLT,$(SOURCES_$_))
+SOURCES_ALL+=$(foreach _,JS PY HTML CSS CSS_JS XML XSLT,$(SOURCES_$_))
 endif
 
 # --

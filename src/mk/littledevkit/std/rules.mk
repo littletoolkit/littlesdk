@@ -56,7 +56,8 @@ clean: ## Cleans the project, removing build and run files
 	@$(call rule-pre-cmd)
 	for dir in build run dist; do
 		if [ -e "$$dir" ]; then
-			echo "$(call fmt-action,Cleaning up directory: $(call fmt-path,$$dir))"
+			count=$$(find $$dir -name '*' | wc -l)
+			echo "$(call fmt-action,Cleaning up directory: $(call fmt-path,$$dir)) [$$count]"
 			rm -rf "$$dir"
 		fi
 	done

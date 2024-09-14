@@ -12,13 +12,16 @@ MAKEFLAGS+=--no-builtin-rules
 # be able to load the modules
 KIT_MODULES_PATH:=$(patsubst %.mk,%,$(lastword $(MAKEFILE_LIST)))
 KIT_MODULES?=$(KIT_MODULES_AVAILABLE)
+KIT_TITLE?=
+KIT_HLO?=🧰 $(BOLD)LittleDevKit$(if $(KIT_TITLE), ― $(KIT_TITLE))$(RESET)
+KIT_LOGGING?=
 
 include $(KIT_MODULES_PATH)/std/lib.mk
-$(info ┉┅━┅┉ ━━━ 🧰 $(BOLD)LittleDevKit$(RESET))
+$(info ┉┅━┅┉ ━━━ $(KIT_HLO)$(RESET))
 include $(KIT_MODULES_PATH)/std/config.mk
 include $(KIT_MODULES_PATH)/std/rules.mk
 
-def-kit-include=$(EOL)$(info $(call fmt-action,Load $(call fmt-module,$1)))$(EOL)include $1
+def-kit-include=$(EOL)$(if $(filter quiet,$(KIT_LOGGING)),,$(info $(call fmt-action,Load $(call fmt-module,$1))))$(EOL)include $1
 # FIXME: That won't work if we have modules found elsewhere than KIT_MODULES_PATH
 define def-kit-module-load
 $(if $(wildcard src/mk/$1),$(call def-kit-include,src/mk/$1))

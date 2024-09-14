@@ -84,6 +84,30 @@ endef
 
 # -----------------------------------------------------------------------------
 #
+# SHELL HELPERS
+#
+# -----------------------------------------------------------------------------
+
+define sh-check-defined
+	if [ -z "$($1)" ]; then
+		echo "$(call fmt-error,Variable is undefined: $1)"
+		exit 1
+	fi
+endef
+
+define sh-check-exists
+	if [ -z "$1" ]; then
+		echo "$(call fmt-error,Variable is undefined)"
+		exit 1
+	elif [ ! -e "$1" ]; then
+		echo "$(call fmt-error,Path deos not exists: $(call fmt-path,$1))"
+		exit 1
+	fi
+endef
+
+
+# -----------------------------------------------------------------------------
+#
 # FILE FUNCTIONS
 #
 # -----------------------------------------------------------------------------
@@ -99,6 +123,7 @@ file-find=$(wildcard $(subst SUF,$(strip $(if $2,$2,.)),$(strip $(subst PRE,$(if
 # -----------------------------------------------------------------------------
 
 fmt-prefix=$(BOLD)$(FMT_PREFIX)$(RESET)
+fmt-error=$(COLOR_ERROR)$(FMT_PREFIX)$(RESET)
 fmt-tip   =$(call fmt-prefix)$(SPACE)👉   $1$(RESET)
 fmt-action=$(call fmt-prefix)  →  $1$(RESET)
 fmt-path=🗅  $(dir $1)$(BOLD)$(notdir $1)$(RESET)
