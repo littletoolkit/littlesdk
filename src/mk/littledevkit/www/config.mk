@@ -1,3 +1,5 @@
+PORT?=8000
+
 RUN_WWW_ALL?=\
 	$(SOURCES_HTML:src/html/%.html=run/%.html)\
 	$(SOURCES_XML:src/xml/%.xml=run/%.xml)\

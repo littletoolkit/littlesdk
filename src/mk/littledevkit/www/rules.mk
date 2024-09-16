@@ -4,7 +4,7 @@ run-www: $(RUN_WWW_ALL) ## Runs the local web server
 	if [ -d "deps/extra" ]; then
 		PORT=$(PORT) PYTHONPATH=deps/extra/src/py python -m extra
 	else
-		python -m http.serer $(PORT)
+		python -m http.server $(PORT)
 	fi
 	$(call rule-post-cmd)
 
