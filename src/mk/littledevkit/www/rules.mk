@@ -45,9 +45,13 @@ dist/www/%.html: src/xml/%.xml $(SOURCES_XSLT)
 		mv "$@.tmp" "$@"
 	fi
 
+dist/www/lib/js/%.js: src/js/%.js
+	@$(call rule-pre-cmd)
+	$(call use-cmd,esbuild) --minify --outfile="$@" "$<"
+
 dist/www/lib/css/%.css: src/css/%.css
 	@$(call rule-pre-cmd)
-	cp -a "$<" "$@"
+	cp -Lp "$<" "$@"
 
 dist/www/lib/css/%.css: src/css/%.js
 	@$(call rule-pre-cmd)
@@ -55,5 +59,32 @@ dist/www/lib/css/%.css: src/css/%.js
 		unlink "$@"
 		exit 1
 	fi
+	# Thanks Claude!
+	sed -i '
+	# Remove comments
+	s!/\*[^*]*\*\+\([^/][^*]*\*\+\)*/!!g
+	s!//.*$$!!g
 
+	# Remove newlines and all whitespace around punctuation/brackets
+	s/\s*{/{/g
+	s/\s*}\s*/}/g
+	s/\s*:\s*/:/g
+	s/\s*;\s*/;/g
+	s/\s*,\s*/,/g
+
+	# Remove trailing semicolon before closing bracket
+	s/;}$$/}/g
+
+	# Remove spaces around operators
+	s/\s*+\s*/+/g
+	s/\s*>\s*/>/g
+	s/\s*~\s*/~/g
+
+	# Collapse all remaining whitespace
+	s/[[:space:]]\+/ /g
+
+	# Remove leading and trailing spaces
+	s/^ //
+	s/ $$//
+	' "$@"
 # EOF
