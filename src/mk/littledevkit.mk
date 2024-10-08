@@ -10,6 +10,7 @@ MAKEFLAGS+=--no-builtin-rules
 # --
 # We load the standard library, at which point we'll
 # be able to load the modules
+KIT_PATH:=$(dir $(lastword $(MAKEFILE_LIST)))../..
 KIT_MODULES_PATH:=$(patsubst %.mk,%,$(lastword $(MAKEFILE_LIST)))
 KIT_MODULES?=$(KIT_MODULES_AVAILABLE)
 KIT_TITLE?=

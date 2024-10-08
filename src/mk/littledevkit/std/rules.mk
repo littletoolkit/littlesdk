@@ -62,6 +62,9 @@ clean: ## Cleans the project, removing build and run files
 		fi
 	done
 
+shell: ## Opens a shell setup with the environment
+	@env -i TERM=$(TERM) bash --noprofile --rcfile "$(KIT_PATH)/src/sh/std.prompt.sh"
+
 print-%:
 	@$(info $(BOLD)$*=$(RESET)$(EOL)$(strip $($*))$(EOL)$(BOLD)END$(RESET))
 
