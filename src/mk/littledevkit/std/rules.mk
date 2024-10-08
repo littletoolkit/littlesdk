@@ -1,3 +1,5 @@
+
+.PHONY: help
 help: ## This command
 	@$(call rule-pre-cmd)
 	cat << EOF
@@ -52,18 +54,27 @@ help-vars: ## Shows available configuration variables
 	done
 	echo "$(call fmt-tip,Run the following to see the value of the variable: $(BOLD)make print-VARNAME$(DIM))"
 
+.PHONY: clean
 clean: ## Cleans the project, removing build and run files
 	@$(call rule-pre-cmd)
-	for dir in build run dist; do
-		if [ -e "$$dir" ]; then
+	for dir in build run dist $(CLEAN_ALL); do
+		if [ -d "$$dir" ]; then
 			count=$$(find $$dir -name '*' | wc -l)
 			echo "$(call fmt-action,Cleaning up directory: $(call fmt-path,$$dir)) [$$count]"
 			rm -rf "$$dir"
+		elif [ -e "$$dir" ]; then
+			echo "$(call fmt-action,Cleaning up file: $(call fmt-path,$$dir))"
+			unlink "$$dir"
 		fi
 	done
 
+.PHONY: build
+build: $(BUILD_ALL) ## Builds all outputs in BUILD_ALL
+	@
+
+.PHONY: shell
 shell: ## Opens a shell setup with the environment
-	@env -i TERM=$(TERM) PATH=$(realpath bin):$(DEPS_PATH):$(BASE_PATH) PYTHONPATH=$(realpath src/py):$(DEPS_PYTHONPATH):$(BASE_PYTHONPATH) bash --noprofile --rcfile "$(KIT_PATH)/src/sh/std.prompt.sh"
+	@env -i TERM=$(TERM) "PATH=$(ENV_PATH)" "PYTHONPATH=$(ENV_PYTHONPATH)" bash --noprofile --rcfile "$(KIT_PATH)/src/sh/std.prompt.sh"
 
 print-%:
 	@$(info $(BOLD)$*=$(RESET)$(EOL)$(strip $($*))$(EOL)$(BOLD)END$(RESET))

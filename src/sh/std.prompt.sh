@@ -13,7 +13,7 @@ function okthanksbye {
 function prompt {
   status_color=$(if [[ $? == 0 ]]; then echo -n "${BLUE}"; else echo -n "${RED}"; fi)
   prompt_path="$(basename "$(dirname "$PWD")")/$BOLD$(basename "$PWD")"
-  PS1="┄―――→  🐚 ${BOLD}LittleDevShell${RESET}\n${BOLD}[kit]${RESET}  🛠️\[$status_color\]${prompt_path}\[$RESET\] ▷  "
+  PS1="┄―――→  🐚 \[${BOLD}\]LittleDevShell\[${RESET}\]\n\[${BOLD}\][kit]\[${RESET}\]  ⏣  \[$status_color\]${prompt_path}\[$RESET\] ▷  "
 }
 echo "${BOLD}[kit]${RESET}  →  Provisioning sandboxed shell: ${BOLD}PATH,PYTHONPATH,LDLIBRARYPATH${RESET}"
 export PROMPT_COMMAND=prompt

@@ -4,7 +4,7 @@
 # it has the correct version.
 
 LITTLE_DEVKIT_VERSION=main
-SHELL:=elvish
+SHELL:=bash
 LDK_PATH:=$(subst //,,$(dir $(lastword $(MAKEFILE_LIST)))/)
 LDK_FLAGS?=
 ifeq ($(filter no-check-version,$(LDK_FLAGS)),)
@@ -17,15 +17,15 @@ endif
 .PHONY: check-version
 check-version:
 	@
-	if (eq "" "$(filter no-check-version,$(LDK_FLAGS))" ) {
+	if [ "$(filter no-check-version,$(LDK_FLAGS))" == "" ]; then
 		var this_version = (git -C $(LDK_PATH) rev-parse HEAD)
 		var that_version = (git -C $(LDK_PATH) rev-parse $(LITTLE_DEVKIT_VERSION))
-		if (not (eq $$this_version $$that_version)) {
+		if [ "$$this_version" != "$$that_version" ]; then
 			echo "--- LDK is at $$that_version [$(LITTLE_DEVKIT_VERSION)] (was $$this_version)"
-		} else {
+		else
 			echo "--- LDK is at $$that_version [$(LITTLE_DEVKIT_VERSION)]"
-		}
-	}
+		fi
+	fi
 
 .ONESHELL:
 # EOF

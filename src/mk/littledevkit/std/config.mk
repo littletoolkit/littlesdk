@@ -3,7 +3,6 @@
 BASE_PATH?=$(PATH)
 BASE_PYTHONPATH?=$(PYTHONPATH)
 BASE_LDLIBRARYPATH?=$(LDLIBRARYPATH)
-
 # -- ## Phases
 PREP_ALL?=## Dependencies that will be met by `make prep`
 BUILD_ALL?=## Files to be built
@@ -25,6 +24,11 @@ DEPS_CSS_MODULES?=$(foreach D,$(DEPS_ALL),$(if $(wildcard $D/src/css),$D/src/css
 DEPS_PATH?=$(subst $(SPACE),:,$(foreach P,$(DEPS_BIN),$(realpath $P)))
 DEPS_PYTHONPATH?=$(subst $(SPACE),:,$(foreach P,$(DEPS_PY_MODULES),$(realpath $P)))
 DEPS_JSPATH?=$(subst $(SPACE),$(COMMA),$(foreach D,$(DEPS_JS_MODULES),$(foreach M,$(wildcard $D/*),"@$(firstword $(subst .,$(SPACE),$(notdir $M)))":"$(realpath $M)")))
+
+# --
+# This is fed to `use-env`
+ENV_PATH=$(realpath bin):$(realpath run/bin):$(DEPS_PATH):$(BASE_PATH)
+ENV_PYTHONPATH=$(realpath src/py):$(DEPS_PYTHONPATH):$(BASE_PYTHONPATH)
 
 # --
 # ## Sources

@@ -1,7 +1,6 @@
 # Core variables
 NULL:=
 SPACE:=$(NULL) $(NULL)
-COMMA:=,
 define EOL
 $(if 1,
 ,)
@@ -90,20 +89,32 @@ endef
 # -----------------------------------------------------------------------------
 
 define sh-check-defined
-	if [ -z "$($1)" ]; then
-		echo "$(call fmt-error,Variable is undefined: $1)"
-		exit 1
-	fi
+if [ -z "$($1)" ]; then
+	echo "$(call fmt-error,Variable is undefined: $1)"
+	exit 1
+fi
 endef
 
 define sh-check-exists
-	if [ -z "$1" ]; then
-		echo "$(call fmt-error,Variable is undefined)"
-		exit 1
-	elif [ ! -e "$1" ]; then
-		echo "$(call fmt-error,Path deos not exists: $(call fmt-path,$1))"
-		exit 1
-	fi
+if [ -z "$1" ]; then
+	echo "$(call fmt-error,Variable is undefined)"
+	exit 1
+elif [ ! -e "$1" ]; then
+	echo "$(call fmt-error,Path does not exist: $(call fmt-path,$1))"
+	exit 1
+fi
+endef
+
+define install-tool
+if [ ! -e "$1" ]; then
+	echo "$(call fmt-error,Cannot install tool as it is missing: $(call fmt-path,$1))"
+	exit 1
+fi
+if [ ! -d "run/bin" ]; then
+	mkdir -p "run/bin"
+fi
+echo "$(call fmt-action,Installing tool $(BOLD)$(notdir $1))"
+ln -sfr "$1" "run/bin/$(notdir $1)"
 endef
 
 # -----------------------------------------------------------------------------
@@ -111,7 +122,9 @@ endef
 # DEPENDENCIES
 #
 # -----------------------------------------------------------------------------
+
 use-cmd=$1
+use-env=$(foreach E,$(if $1,$1 $2 $3 $4 $5 $6,PATH PYTHONPATH),export $E=$(ENV_$E);)
 
 # -----------------------------------------------------------------------------
 #

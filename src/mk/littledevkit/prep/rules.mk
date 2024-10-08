@@ -2,6 +2,18 @@
 prep: $(PREP_ALL) ## Explicitly resolves $(PREP_ALL)
 	@$(call rule-pre-cmd)
 
+build/install-tool-bun.task: build/install-tool-bun-latest.task
+	@$(call rule-pre-cmd)
+	touch "$@"
+
+build/install-tool-bun-%.task:
+	@$(call rule-pre-cmd)
+	# FIXME: This does not seem to work, I get a segfault
+	curl -fsSL -o $@.zip https://github.com/oven-sh/bun/releases/$*/download/bun-linux-x64.zip
+	mkdir -p "$@.files"
+	unzip -j $@.zip  -d "$@.files"
+	$(call install-tool,$@.files/bun)
+
 build/install-github-%.task: ## Installs the given Github repo in the form USER/REPO@VERSION
 	@$(call rule-pre-cmd)
 	USERNAME="$(firstword $(subst /,$(SPACE),$*))"
