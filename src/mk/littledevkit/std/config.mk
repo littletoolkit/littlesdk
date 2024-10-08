@@ -1,12 +1,30 @@
 
-# --
-# ## Phases
+# -- ## Environment
+BASE_PATH?=$(PATH)
+BASE_PYTHONPATH?=$(PYTHONPATH)
+BASE_LDLIBRARYPATH?=$(LDLIBRARYPATH)
+
+# -- ## Phases
 PREP_ALL?=## Dependencies that will be met by `make prep`
 BUILD_ALL?=## Files to be built
 RUN_ALL?=## Dependencies that will be met by `make run`
 SOURCES_ALL?=## All the source files known by the kit
 PACKAGE_ALL?=## All the files that will be packaged in distributions
 DIST_ALL?=## All the distribution files
+
+# --
+# This manages the dependencies (in deps/). When dependencies follow conventions,
+# they will automatically populate the DEPS_PATH, DEPS_PYTHONPATH and DEPS_JSPATH
+# variables.
+DEPS_ALL?=$(wildcard deps/*)
+DEPS_BIN?=$(foreach D,$(DEPS_ALL),$(if $(wildcard $D/bin),$D/bin))
+DEPS_PY_MODULES?=$(foreach D,$(DEPS_ALL),$(if $(wildcard $D/src/py),$D/src/py))
+DEPS_JS_MODULES?=$(foreach D,$(DEPS_ALL),$(if $(wildcard $D/src/js),$D/src/js))
+DEPS_CSS_MODULES?=$(foreach D,$(DEPS_ALL),$(if $(wildcard $D/src/css),$D/src/css))
+
+DEPS_PATH?=$(subst $(SPACE),:,$(foreach P,$(DEPS_BIN),$(realpath $P)))
+DEPS_PYTHONPATH?=$(subst $(SPACE),:,$(foreach P,$(DEPS_PY_MODULES),$(realpath $P)))
+DEPS_JSPATH?=$(subst $(SPACE),$(COMMA),$(foreach D,$(DEPS_JS_MODULES),$(foreach M,$(wildcard $D/*),"@$(firstword $(subst .,$(SPACE),$(notdir $M)))":"$(realpath $M)")))
 
 # --
 # ## Sources

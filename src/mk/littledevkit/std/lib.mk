@@ -1,6 +1,7 @@
 # Core variables
 NULL:=
 SPACE:=$(NULL) $(NULL)
+COMMA:=,
 define EOL
 $(if 1,
 ,)

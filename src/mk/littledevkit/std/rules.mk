@@ -63,7 +63,7 @@ clean: ## Cleans the project, removing build and run files
 	done
 
 shell: ## Opens a shell setup with the environment
-	@env -i TERM=$(TERM) bash --noprofile --rcfile "$(KIT_PATH)/src/sh/std.prompt.sh"
+	@env -i TERM=$(TERM) PATH=$(realpath bin):$(DEPS_PATH):$(BASE_PATH) PYTHONPATH=$(realpath src/py):$(DEPS_PYTHONPATH):$(BASE_PYTHONPATH) bash --noprofile --rcfile "$(KIT_PATH)/src/sh/std.prompt.sh"
 
 print-%:
 	@$(info $(BOLD)$*=$(RESET)$(EOL)$(strip $($*))$(EOL)$(BOLD)END$(RESET))
