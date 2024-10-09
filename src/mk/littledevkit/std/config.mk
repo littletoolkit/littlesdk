@@ -1,3 +1,4 @@
+DEFAULT_RULE?=help
 
 # -- ## Environment
 BASE_PATH?=$(PATH)

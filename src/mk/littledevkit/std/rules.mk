@@ -1,3 +1,6 @@
+.PHONY: default
+default: $(DEFAULT_RULE)
+	@
 
 .PHONY: help
 help: ## This command

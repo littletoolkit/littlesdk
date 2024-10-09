@@ -76,8 +76,8 @@ define rule-pre-cmd
 			echo "$(call fmt-action,Done $(call fmt-rule,$@)) ✔ "
 		;;
 	esac
+	$(call use-env)
 endef
-
 define rule-post-cmd
 	echo "       ⤷  $(if $1,🗅 × $(words $1) : $(BOLD)$(strip $1),$@)$(RESET)"
 endef
@@ -90,8 +90,7 @@ endef
 
 define sh-check-defined
 if [ -z "$($1)" ]; then
-	echo "$(call fmt-error,Variable is undefined: $1)"
-	exit 1
+	echo "$(call fmt-error,Variable is undefined: $1)" exit 1
 fi
 endef
 

@@ -18,8 +18,8 @@ endif
 check-version:
 	@
 	if [ "$(filter no-check-version,$(LDK_FLAGS))" == "" ]; then
-		var this_version = (git -C $(LDK_PATH) rev-parse HEAD)
-		var that_version = (git -C $(LDK_PATH) rev-parse $(LITTLE_DEVKIT_VERSION))
+		this_version=$$(git -C $(LDK_PATH) rev-parse HEAD)
+		that_version=$$(git -C $(LDK_PATH) rev-parse $(LITTLE_DEVKIT_VERSION))
 		if [ "$$this_version" != "$$that_version" ]; then
 			echo "--- LDK is at $$that_version [$(LITTLE_DEVKIT_VERSION)] (was $$this_version)"
 		else

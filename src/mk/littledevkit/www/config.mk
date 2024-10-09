@@ -1,6 +1,8 @@
 PORT?=8000
 
-RUN_WWW_ALL?=\
+WWW_PATH=dist/www
+
+RUN_WWW_ALL+=\
 	$(SOURCES_HTML:src/html/%.html=run/%.html)\
 	$(SOURCES_XML:src/xml/%.xml=run/%.xml)\
 	$(SOURCES_XSLT:src/xslt/%.xslt=run/lib/xslt/%.xslt)\
@@ -11,7 +13,7 @@ RUN_WWW_ALL?=\
 	$(SOURCES_JSON:src/json/%.json=run/lib/json/%.json)
 
 
-DIST_WWW_ALL?=\
+DIST_WWW_ALL+=\
 	$(SOURCES_HTML:src/html/%.html=dist/www/%.html)\
 	$(SOURCES_XML:src/xml/%.xml=dist/www/%.html)\
 	$(SOURCES_CSS:src/css/%.css=dist/www/lib/css/%.css)\
