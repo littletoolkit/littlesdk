@@ -1,33 +1,3 @@
-define www-css-minify
-sed -i '
-# Remove comments
-s!/\*[^*]*\*\+\([^/][^*]*\*\+\)*/!!g
-s!//.*$$!!g
-
-# Remove newlines and all whitespace around punctuation/brackets
-s/\s*{/{/g
-s/\s*}\s*/}/g
-s/\s*:\s*/:/g
-s/\s*;\s*/;/g
-s/\s*,\s*/,/g
-
-# Remove trailing semicolon before closing bracket
-s/;}$$/}/g
-
-# Remove spaces around operators
-s/\s*+\s*/+/g
-s/\s*>\s*/>/g
-s/\s*~\s*/~/g
-
-# Collapse all remaining whitespace
-s/[[:space:]]\+/ /g
-
-# Remove leading and trailing spaces
-s/^ //
-s/ $$//
-' "$(if $1,$1,$@)"
-endef
-
 .PHONY: dist-www
 run-www: $(RUN_WWW_ALL) ## Runs the local web server
 	@$(call rule-pre-cmd)
@@ -82,7 +52,6 @@ dist/www/lib/js/%.js: src/js/%.js
 dist/www/lib/css/%.css: src/css/%.css
 	@$(call rule-pre-cmd)
 	cp -Lp "$<" "$@"
-	$(call www-css-minify)
 
 dist/www/lib/css/%.css: src/css/%.js
 	@$(call rule-pre-cmd)
@@ -90,6 +59,7 @@ dist/www/lib/css/%.css: src/css/%.js
 		unlink "$@"
 		exit 1
 	fi
-	$(call www-css-minify)
+
+# EOF
 
 # EOF
