@@ -79,6 +79,10 @@ build: $(BUILD_ALL) ## Builds all outputs in BUILD_ALL
 shell: ## Opens a shell setup with the environment
 	@env -i TERM=$(TERM) "PATH=$(ENV_PATH)" "PYTHONPATH=$(ENV_PYTHONPATH)" bash --noprofile --rcfile "$(KIT_PATH)/src/sh/std.prompt.sh"
 
+live-%:
+	@$(call rule-pre-cmd)
+	echo $(SOURCES_ALL) | xargs -n1 echo | entr -c -r bash -c 'sleep 0.25 && make $* $(MAKEFLAGS)'
+
 print-%:
 	@$(info $(BOLD)$*=$(RESET)$(EOL)$(strip $($*))$(EOL)$(BOLD)END$(RESET))
 
