@@ -61,24 +61,25 @@ COLOR_CRITICAL        :=$(call termcap,setaf 163)
 #
 # -----------------------------------------------------------------------------
 
-define rule-pre-cmd
+define rule_pre_cmd
 	case "$@" in
 		*/*)
 			if [ -n "$(dir $@)" ] && [ ! -e "$(dir $@)" ]; then
 				mkdir -p "$(dir $@)"
 			fi
-			echo "$(call fmt-action,Make $(call fmt-path,$@)) 🖫"
+			echo "$(call fmt_action,Make $(call fmt_path,$@)) 🖫"
 		;;
 		*run*|*clean*)
-			echo "$(call fmt-action,Does $(call fmt-rule,$@)) …"
+			echo "$(call fmt_action,Does $(call fmt_rule,$@)) …"
 			;;
 		*)
-			echo "$(call fmt-action,Done $(call fmt-rule,$@)) ✔ "
+			echo "$(call fmt_action,Done $(call fmt_rule,$@)) ✔ "
 		;;
 	esac
-	$(call use-env)
+	$(call use_env)
 endef
-define rule-post-cmd
+
+define rule_post_cmd
 	echo "       ⤷  $(if $1,🗅 × $(words $1) : $(BOLD)$(strip $1),$@)$(RESET)"
 endef
 
@@ -88,31 +89,31 @@ endef
 #
 # -----------------------------------------------------------------------------
 
-define sh-check-defined
+define sh_check_defined
 if [ -z "$($1)" ]; then
-	echo "$(call fmt-error,Variable is undefined: $1)" exit 1
+	echo "$(call fmt_error,Variable is undefined: $1)" exit 1
 fi
 endef
 
-define sh-check-exists
+define sh_check_exists
 if [ -z "$1" ]; then
-	echo "$(call fmt-error,Variable is undefined)"
+	echo "$(call fmt_error,Variable is undefined)"
 	exit 1
 elif [ ! -e "$1" ]; then
-	echo "$(call fmt-error,Path does not exist: $(call fmt-path,$1))"
+	echo "$(call fmt_error,Path does not exist: $(call fmt_path,$1))"
 	exit 1
 fi
 endef
 
-define install-tool
+define install_tool
 if [ ! -e "$1" ]; then
-	echo "$(call fmt-error,Cannot install tool as it is missing: $(call fmt-path,$1))"
+	echo "$(call fmt_error,Cannot install tool as it is missing: $(call fmt_path,$1))"
 	exit 1
 fi
 if [ ! -d "run/bin" ]; then
 	mkdir -p "run/bin"
 fi
-echo "$(call fmt-action,Installing tool $(BOLD)$(notdir $1))"
+echo "$(call fmt_action,Installing tool $(BOLD)$(notdir $1))"
 ln -sfr "$1" "run/bin/$(notdir $1)"
 endef
 
@@ -122,8 +123,8 @@ endef
 #
 # -----------------------------------------------------------------------------
 
-use-cmd=$1
-use-env=$(foreach E,$(if $1,$1 $2 $3 $4 $5 $6,PATH PYTHONPATH),export $E=$(ENV_$E);)
+use_cmd=$1
+use_env=$(foreach E,$(if $1,$1 $2 $3 $4 $5 $6,PATH PYTHONPATH),export $E=$(ENV_$E);)
 
 # -----------------------------------------------------------------------------
 #
@@ -132,21 +133,21 @@ use-env=$(foreach E,$(if $1,$1 $2 $3 $4 $5 $6,PATH PYTHONPATH),export $E=$(ENV_$
 # -----------------------------------------------------------------------------
 
 # --
-#  `file-find PATH PATTERN`, eg `$(call file-find,src/py,*.py)` will match all
+#  `file_find PATH PATTERN`, eg `$(call file_find,src/py,*.py)` will match all
 #  files in `PATH` (recursively) and also matching patterns.
-file-find=$(wildcard $(subst SUF,$(strip $(if $2,$2,.)),$(strip $(subst PRE,$(if $1,$1,.),PRE/SUF PRE/*/SUF PRE/*/*/SUF PRE/*/*/*/SUF PRE/*/*/*/*/SUF PRE/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/*/*/SUF))))
+file_find=$(wildcard $(subst SUF,$(strip $(if $2,$2,.)),$(strip $(subst PRE,$(if $1,$1,.),PRE/SUF PRE/*/SUF PRE/*/*/SUF PRE/*/*/*/SUF PRE/*/*/*/*/SUF PRE/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/*/*/SUF))))
 # -----------------------------------------------------------------------------
 #
 # FORMATTING FUNCTIONS
 #
 # -----------------------------------------------------------------------------
 
-fmt-prefix=$(BOLD)$(FMT_PREFIX)$(RESET)
-fmt-error=$(COLOR_ERROR)$(FMT_PREFIX)$(RESET)
-fmt-tip   =$(call fmt-prefix)$(SPACE)👉   $1$(RESET)
-fmt-action=$(call fmt-prefix)  →  $1$(RESET)
-fmt-path=🗅  $(dir $1)$(BOLD)$(notdir $1)$(RESET)
-fmt-module=🖸  $(lastword $(strip $(subst /,$(SPACE),$(dir $1))))/$(BOLD)$(notdir $1)$(RESET)
-fmt-rule=$(if $2,$2,➳)  $(BOLD)$1$(RESET)
+fmt_prefix=$(BOLD)$(FMT_PREFIX)$(RESET)
+fmt_error=$(COLOR_ERROR)$(FMT_PREFIX)$(RESET)
+fmt_tip   =$(call fmt_prefix)$(SPACE)👉   $1$(RESET)
+fmt_action=$(call fmt_prefix)  →  $1$(RESET)
+fmt_path=🗅  $(dir $1)$(BOLD)$(notdir $1)$(RESET)
+fmt_module=🖸  $(lastword $(strip $(subst /,$(SPACE),$(dir $1))))/$(BOLD)$(notdir $1)$(RESET)
+fmt_rule=$(if $2,$2,➳)  $(BOLD)$1$(RESET)
 
 # EOF
