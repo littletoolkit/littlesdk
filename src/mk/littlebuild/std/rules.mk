@@ -1,3 +1,5 @@
+USE_CLI_CHECK+=|| which $1 2> /dev/null
+
 .PHONY: default
 default: $(DEFAULT_RULE)
 	@
@@ -7,7 +9,7 @@ help: ## This command
 	@$(call rule_pre_cmd)
 	cat << EOF
 	…
-	📖 $(BOLD)LittleDevKit$(RESET) phases:
+	📖 $(BOLD)LittleBuild$(RESET) phases:
 	$(call fmt_rule,prep)     ― Installs dependencies & prepares environment
 	$(call fmt_rule,build)    ― Builds all the assets required to run and distribute
 	$(call fmt_rule,run)      ― Runs the project and its dependencies
@@ -18,43 +20,43 @@ help: ## This command
 	$(call fmt_rule,check)    ― Lints, audits and formats the code
 	$(call fmt_rule,test)     ― Runs tests
 	EOF
-	echo ""
-	echo "Available $(BOLD)rules$(RESET):"
 	dev_rules=()
-	for SRC in $(filter %/rules.mk,std/rules.mk $(KIT_MODULES_SOURCES)); do
+	main_rules=()
+	for SRC in $(filter %/rules.mk,$(MODULES_SOURCES)); do
 		while read -r line; do
 			rule=$${line%%:*}
-			origin=`printf "%-11.11s" $$(dirname $$SRC)`
+			origin=$$(dirname $$SRC)
 			case "$$rule" in
 				*/*)
-					dev_rules+=("$$origin $(call fmt_rule,$$rule,🗅) ―$${line##*##}") # NOHELP
-					dev_rules+=("EOL")
+					dev_rules+=("$(call fmt_rule,$$rule,🗅) ―$${line##*##} $(DIM)[$$origin]$(RESET)") # NOHELP
 					;;
 				*)
-					echo "$$origin $(call fmt_rule,$$rule) ―$${line##*##}" # NOHELP
+					main_rules+=("$(call fmt_rule,$$rule) ―$${line##*##} $(DIM)[$$origin]$(RESET)") # NOHELP
 					;;
 			esac
-		done < <(grep '##' $(KIT_MODULES_PATH)/$$SRC | grep -v NOHELP) # NOHELP
+		done < <(grep '##' $(MODULES_PATH)/$$SRC | grep -v NOHELP) # NOHELP
 	done
+	if [ ! $${#main_rules[@]} -eq 0 ]; then
+		echo ""
+		echo "Available $(BOLD)rules$(RESET):"
+		printf '%s\n' "$${main_rules[@]}" | sort
+	fi
 	if [ ! $${#dev_rules[@]} -eq 0 ]; then
 		echo
 		echo "Available $(BOLD)development rules$(RESET):"
-		for word in "$${dev_rules[@]}"; do
-			case "$$word" in
-				EOL) echo ;;
-				*) echo -n "$$word " ;;
-			esac
-		 done
-	 fi
+		printf '%s\n' "$${dev_rules[@]}" | sort
+	fi
 
 help-vars: ## Shows available configuration variables
 	@
-	for SRC in $(filter %/config.mk,$(KIT_MODULES_SOURCES)); do
+	vars=()
+	for SRC in $(filter %/config.mk,$(MODULES_SOURCES)); do
 		while read -r line; do
 			varname=$${line%%=*}
-			echo "[$$(dirname $$SRC)]$(BOLD)" $${varname//[:?]/}"$(RESET)" # NOHELP
-		done < <(grep '=' $(KIT_MODULES_PATH)/$$SRC | grep -v NOHELP)
+			vars+=("$(BOLD)$${varname//[:?]/} $(DIM)[$$(dirname $$SRC)]$(RESET)") # NOHELP
+		done < <(grep '=' $(MODULES_PATH)/$$SRC | grep -v NOHELP | grep -v '#')
 	done
+	printf '%s\n' "$${vars[@]}" | sort
 	echo "$(call fmt_tip,Run the following to see the value of the variable: $(BOLD)make print-VARNAME$(DIM))"
 
 .PHONY: clean
@@ -79,14 +81,29 @@ build: $(BUILD_ALL) ## Builds all outputs in BUILD_ALL
 shell: ## Opens a shell setup with the environment
 	@env -i TERM=$(TERM) "PATH=$(ENV_PATH)" "PYTHONPATH=$(ENV_PYTHONPATH)" bash --noprofile --rcfile "$(KIT_PATH)/src/sh/std.prompt.sh"
 
+.PHONY: live-%
 live-%:
 	@$(call rule_pre_cmd)
 	echo $(SOURCES_ALL) | xargs -n1 echo | entr -c -r bash -c 'sleep 0.25 && make $* $(MAKEFLAGS)'
 
+.PHONY: print-%
 print-%:
 	@$(info $(BOLD)$*=$(RESET)$(EOL)$(strip $($*))$(EOL)$(BOLD)END$(RESET))
 
+.PHONY: def-%
 def-%:
 	@$(info $(BOLD)$*=$(RESET)$(EOL)$(value $*)$(EOL)$(BOLD)END$(RESET))
 
-# EOF
+build/cli-%.task:
+	CLI_PATH="$$(test -e "run/bin/$*" && echo "run/bin/$*" $(call USE_CLI_CHECK,$*) || true)"
+	if [ -z "$$CLI_PATH" ]; then
+		echo "$(call fmt_error,Could not find CLI tool: $*)"
+		test -e "$@" && unlink "$@"
+		exit 1
+	else
+		mkdir -p "$(dir $@)"
+		echo "$$CLI_PATH" > "$@"
+		touch --date=@0 "$@"
+		echo OK: $$CLI_PATH
+	fi
+# EOX

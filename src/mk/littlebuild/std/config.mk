@@ -53,9 +53,11 @@ FMT_PREFIX?=[kit]
 
 # --
 # Lists all source files defined in the modules like `std/lib.mk std/vars.mk`
-KIT_MODULES_SOURCES:=$(patsubst $(KIT_MODULES_PATH)/%,%,$(wildcard $(KIT_MODULES_PATH)/*/*.mk))
+MODULES_SOURCES:=$(patsubst $(MODULES_PATH)/%,%,$(wildcard $(MODULES_PATH)/*/*.mk))
 
 # --
 # Lists all available modules, like `std prep run`
-KIT_MODULES_AVAILABLE:=$(foreach M,$(wildcard $(KIT_MODULES_PATH)/*),$(if $(wildcard $M/*.mk),$(notdir $M)))
+MODULES_AVAILABLE:=$(foreach M,$(wildcard $(MODULES_PATH)/*),$(if $(wildcard $M/*.mk),$(notdir $M)))
+
+USE_CLI_CHECK+=|| which $1 2> /dev/null
 # EOF

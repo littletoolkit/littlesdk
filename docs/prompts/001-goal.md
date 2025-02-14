@@ -22,6 +22,9 @@ Some of the key goals are:
   and perform the very same tasks and get the very same outputs on CI
   with ease.
 
+- Discoverable: it should be easy to see what you can do, and if commands
+  fail, it should be easy to recover or know what to do next.
+
 Project structure:
 
 - `src/$LANG/*` contains the sources by language
@@ -29,19 +32,14 @@ Project structure:
 - `dist` where the build system will place distribution outputs
 - `run` where runtime files will be installed
 
-Concepts:
-
-- components:
-- services:
-
 The build system will generate files in the following paths:
 
 - `build/$COMPONENT/$COMPONENT_REVISION/*` to store build artifacts for the
    given revision of the components.
 - `dist/$REVISION/*` to store distribution artifacts for the given
    revision of the project.
-- `run/local/bin` to alias CLI binaries to be used
-- `run/local/{share,man,lib}` local supporting files
+- `run/bin` to alias CLI binaries to be used
+- `run/{share,man,lib}` local supporting files
 - `run/$COMPONENT/*` per-component runtimefiles (eg. `postgres`, `bun`, etc)
 
 The build system defines the following phases:

@@ -11,9 +11,15 @@ endef
 # ARGS
 #
 # -----------------------------------------------------------------------------
+
+# We define them so that we don't get warnings for undefined variables
 1?=
 2?=
 3?=
+4?=
+5?=
+6?=
+7?=
 
 # -----------------------------------------------------------------------------
 #
@@ -61,6 +67,9 @@ COLOR_CRITICAL        :=$(call termcap,setaf 163)
 #
 # -----------------------------------------------------------------------------
 
+# --
+# A generic function to be used when writing a rule. This will create the
+# parent directories for build rules, and log messages for other rules.
 define rule_pre_cmd
 	case "$@" in
 		*/*)
@@ -79,6 +88,9 @@ define rule_pre_cmd
 	$(call use_env)
 endef
 
+# --
+# A generic function to be used when writing a rule. This will create the
+# parent directories for build rules, and log messages for other rules.
 define rule_post_cmd
 	echo "       ⤷  $(if $1,🗅 × $(words $1) : $(BOLD)$(strip $1),$@)$(RESET)"
 endef
@@ -89,12 +101,19 @@ endef
 #
 # -----------------------------------------------------------------------------
 
+# --
+# `$(call sh_check_defined,STRING)` will fail with an error if `STRING`
+# is empty.
 define sh_check_defined
 if [ -z "$($1)" ]; then
-	echo "$(call fmt_error,Variable is undefined: $1)" exit 1
+	echo "$(call fmt_error,Variable is undefined: $1)"
+	exit 1
 fi
 endef
 
+# --
+# `$(call sh_check_exists,PATH)` will fail if `PATH` is undefined or
+# does not exists.
 define sh_check_exists
 if [ -z "$1" ]; then
 	echo "$(call fmt_error,Variable is undefined)"
@@ -105,7 +124,9 @@ elif [ ! -e "$1" ]; then
 fi
 endef
 
-define install_tool
+# --
+# `$(call sh_install_tool,PATH)` will install the tool at `PATH` under `run/bin`.
+define sh_install_tool
 if [ ! -e "$1" ]; then
 	echo "$(call fmt_error,Cannot install tool as it is missing: $(call fmt_path,$1))"
 	exit 1
@@ -125,6 +146,7 @@ endef
 
 use_cmd=$1
 use_env=$(foreach E,$(if $1,$1 $2 $3 $4 $5 $6,PATH PYTHONPATH),export $E=$(ENV_$E);)
+use_cli=$(foreach M,$1 $2 $3 $4 $5 $6 $7,build/cli-$M.task)
 
 # -----------------------------------------------------------------------------
 #
