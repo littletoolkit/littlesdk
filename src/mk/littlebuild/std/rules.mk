@@ -79,7 +79,7 @@ build: $(BUILD_ALL) ## Builds all outputs in BUILD_ALL
 
 .PHONY: shell
 shell: ## Opens a shell setup with the environment
-	@env -i TERM=$(TERM) "PATH=$(ENV_PATH)" "PYTHONPATH=$(ENV_PYTHONPATH)" bash --noprofile --rcfile "$(KIT_PATH)/src/sh/std.prompt.sh"
+	@env -i TERM=$(TERM) "PATH=$(ENV_PATH)" "PYTHONPATH=$(ENV_PYTHONPATH)" bash --noprofile --rcfile "$(LB_PATH)/src/sh/std.prompt.sh"
 
 .PHONY: live-%
 live-%:
@@ -94,7 +94,9 @@ print-%:
 def-%:
 	@$(info $(BOLD)$*=$(RESET)$(EOL)$(value $*)$(EOL)$(BOLD)END$(RESET))
 
-build/cli-%.task:
+# --
+# Ensures thath teh given CLI tool is instatlled
+$(PATH_BUILD)/cli-%.task:
 	CLI_PATH="$$(test -e "run/bin/$*" && echo "run/bin/$*" $(call USE_CLI_CHECK,$*) || true)"
 	if [ -z "$$CLI_PATH" ]; then
 		echo "$(call fmt_error,Could not find CLI tool: $*)"
@@ -104,6 +106,6 @@ build/cli-%.task:
 		mkdir -p "$(dir $@)"
 		echo "$$CLI_PATH" > "$@"
 		touch --date=@0 "$@"
-		echo OK: $$CLI_PATH
+		echo "$(call fmt_result,OK: $$CLI_PATH)"
 	fi
 # EOX

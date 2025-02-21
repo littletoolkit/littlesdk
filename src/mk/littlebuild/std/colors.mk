@@ -49,3 +49,4 @@ REV           :=$(shell TERM="$(TERM)" echo $$(tput rev))
 DIM           :=$(shell TERM="$(TERM)" echo $$(tput dim))
 endif
 endif
+# EOF

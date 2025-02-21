@@ -1,25 +1,25 @@
 PORT?=8000
 
-WWW_PATH=dist/www
+WWW_PATH=$(PATH_DIST)/www
 
 RUN_WWW_ALL+=\
-	$(SOURCES_HTML:src/html/%.html=run/%.html)\
-	$(SOURCES_XML:src/xml/%.xml=run/%.xml)\
-	$(SOURCES_XSLT:src/xslt/%.xslt=run/lib/xslt/%.xslt)\
-	$(SOURCES_CSS:src/css/%.css=run/lib/css/%.css)\
-	$(SOURCES_CSS_JS:src/css/%.js=run/lib/css/%.js)\
-	$(SOURCES_CSS_JS:src/css/%.js=run/lib/css/%.css)\
-	$(SOURCES_JS:src/js/%.js=run/lib/js/%.js)\
-	$(SOURCES_JSON:src/json/%.json=run/lib/json/%.json)
+	$(SOURCES_HTML:$(PATH_SRC)/html/%.html=$(PATH_RUN)/%.html)\
+	$(SOURCES_XML:$(PATH_SRC)/xml/%.xml=$(PATH_RUN)/%.xml)\
+	$(SOURCES_XSLT:$(PATH_SRC)/xslt/%.xslt=$(PATH_RUN)/lib/xslt/%.xslt)\
+	$(SOURCES_CSS:$(PATH_SRC)/css/%.css=$(PATH_RUN)/lib/css/%.css)\
+	$(SOURCES_CSS_JS:$(PATH_SRC)/css/%.js=$(PATH_RUN)/lib/css/%.js)\
+	$(SOURCES_CSS_JS:$(PATH_SRC)/css/%.js=$(PATH_RUN)/lib/css/%.css)\
+	$(SOURCES_JS:$(PATH_SRC)/js/%.js=$(PATH_RUN)/lib/js/%.js)\
+	$(SOURCES_JSON:$(PATH_SRC)/json/%.json=$(PATH_RUN)/lib/json/%.json)
 
 
 DIST_WWW_ALL+=\
-	$(SOURCES_HTML:src/html/%.html=dist/www/%.html)\
-	$(SOURCES_XML:src/xml/%.xml=dist/www/%.html)\
-	$(SOURCES_CSS:src/css/%.css=dist/www/lib/css/%.css)\
-	$(SOURCES_CSS_JS:src/css/%.js=dist/www/lib/css/%.css)\
-	$(SOURCES_JS:src/js/%.js=dist/www/lib/js/%.js)\
-	$(SOURCES_JSON:src/json/%.json=dist/www/lib/json/%.json)
+	$(SOURCES_HTML:$(PATH_SRC)/html/%.html=$(PATH_DIST)/www/%.html)\
+	$(SOURCES_XML:$(PATH_SRC)/xml/%.xml=$(PATH_DIST)/www/%.html)\
+	$(SOURCES_CSS:$(PATH_SRC)/css/%.css=$(PATH_DIST)/www/lib/css/%.css)\
+	$(SOURCES_CSS_JS:$(PATH_SRC)/css/%.js=$(PATH_DIST)/www/lib/css/%.css)\
+	$(SOURCES_JS:$(PATH_SRC)/js/%.js=$(PATH_DIST)/www/lib/js/%.js)\
+	$(SOURCES_JSON:$(PATH_SRC)/json/%.json=$(PATH_DIST)/www/lib/json/%.json)
 
 DIST_ALL+=$(DIST_WWW_ALL)
 RUN_ALL+=$(RUN_WWW_ALL)

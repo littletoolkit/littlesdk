@@ -1,5 +1,4 @@
 .PHONY: prep
-
 prep: $(PREP_ALL) ## Explicitly resolves $(PREP_ALL)
 	@$(call rule_pre_cmd)
 
@@ -7,7 +6,9 @@ prep: $(PREP_ALL) ## Explicitly resolves $(PREP_ALL)
 # CONFIG
 # =============================================================================
 
-%: src/etc/%
+# --
+# Links configuration files
+%: $(PATH_SRC)/etc/%
 	@$(call rule_pre_cmd)
 	ln -sfr "$<" "$@"
 

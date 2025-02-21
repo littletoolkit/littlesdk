@@ -25,9 +25,9 @@ check-version:
 		this_version=$$(git -C $(LITTLEBUILD_PATH) rev-parse HEAD)
 		that_version=$$(git -C $(LITTLEBUILD_PATH) rev-parse $(LITTLEBUILD_VERSION))
 		if [ "$$this_version" != "$$that_version" ]; then
-			echo "--- LDK is at $$that_version [$(LITTLEBUILD_VERSION)] (was $$this_version)"
+			echo "--- LittleBuild is at $$that_version [$(LITTLEBUILD_VERSION)] (was $$this_version)"
 		else
-			echo "--- LDK is at $$that_version [$(LITTLEBUILD_VERSION)]"
+			echo "--- LittleBuild is at $$that_version [$(LITTLEBUILD_VERSION)]"
 		fi
 	fi
 
