@@ -13,6 +13,8 @@ NPM?=npm$(if $(NODE_VERSION),-$(NODE_VERSION))
 USE_NODE?=
 
 PREP_ALL+=$(foreach M,$(USE_NODE),build/install-node-$M.task)
+DIST_WWW_JS=$(patsubst src/js/%,dist/www/lib/js/%,$(filter src/js/%,$(SOURCES_JS)))
+DIST_JS=$(patsubst src/js/%,dist/www/lib/js/%,$(filter src/js/%,$(SOURCES_JS)))
 
 # --
 # The version of Bun, can be the revision number like `1.1.13` or

@@ -30,4 +30,11 @@ $(PATH_BUILD)/install-bun-%.task:
 	$(call sh_install_tool,$@.files/bun)
 
 
+dist/www/lib/%.js: src/%.js
+	@$(call rule_pre_cmd)
+	if ! bun build --minify "$<" > "$@"; then
+		unlink "$@"
+		exit 1
+	fi
+
 # EOF

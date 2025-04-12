@@ -4,6 +4,10 @@ USE_CLI_CHECK+=|| which $1 2> /dev/null
 default: $(DEFAULT_RULE)
 	@
 
+.PHONY: dist
+dist: $(DIST_ALL)
+	@$(call rule_post_cmd)
+
 .PHONY: help
 help: ## This command
 	@$(call rule_pre_cmd)
