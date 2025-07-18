@@ -13,14 +13,15 @@ RUN_WWW_ALL+=\
 	$(SOURCES_JSON:$(PATH_SRC)/json/%.json=$(PATH_RUN)/lib/json/%.json)
 
 
-DIST_WWW_ALL+=\
-	$(SOURCES_HTML:$(PATH_SRC)/html/%.html=$(PATH_DIST)/www/%.html)\
-	$(SOURCES_XML:$(PATH_SRC)/xml/%.xml=$(PATH_DIST)/www/%.html)\
-	$(SOURCES_CSS:$(PATH_SRC)/css/%.css=$(PATH_DIST)/www/lib/css/%.css)\
-	$(SOURCES_CSS_JS:$(PATH_SRC)/css/%.js=$(PATH_DIST)/www/lib/css/%.css)\
-	$(SOURCES_JS:$(PATH_SRC)/js/%.js=$(PATH_DIST)/www/lib/js/%.js)\
-	$(SOURCES_JSON:$(PATH_SRC)/json/%.json=$(PATH_DIST)/www/lib/json/%.json)
-
+DIST_WWW_ALL=
+# DIST_WWW_ALL+=\
+# 	$(SOURCES_HTML:$(PATH_SRC)/html/%.html=$(PATH_DIST)/www/%.html)\
+# 	$(SOURCES_XML:$(PATH_SRC)/xml/%.xml=$(PATH_DIST)/www/%.html)\
+# 	$(SOURCES_CSS:$(PATH_SRC)/css/%.css=$(PATH_DIST)/www/lib/css/%.css)\
+# 	$(SOURCES_CSS_JS:$(PATH_SRC)/css/%.js=$(PATH_DIST)/www/lib/css/%.css)\
+# 	$(SOURCES_JS:$(PATH_SRC)/js/%.js=$(PATH_DIST)/www/lib/js/%.js)\
+# 	$(SOURCES_JSON:$(PATH_SRC)/json/%.json=$(PATH_DIST)/www/lib/json/%.json)
+#
 DIST_ALL+=$(DIST_WWW_ALL)
 RUN_ALL+=$(RUN_WWW_ALL)
 DIST_ALL+=$(DIST_WWW_ALL)

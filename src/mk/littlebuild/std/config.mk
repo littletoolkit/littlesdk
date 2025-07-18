@@ -51,6 +51,7 @@ ENV_PYTHONPATH=$(realpath $(PATH_SRC)/py):$(DEPS_PYTHONPATH):$(BASE_PYTHONPATH)
 # --
 # ## Sources
 SOURCES_JS=$(call file_find,$(PATH_SRC)/js,*.js) ## List of JavaScript sources
+SOURCES_TS=$(call file_find,$(PATH_SRC)/ts,*.ts) ## List of JavaScript sources
 SOURCES_PY=$(call file_find,$(PATH_SRC)/js,*.py) ## List of Python sources
 SOURCES_HTML=$(call file_find,$(PATH_SRC)/html,*.html) ## List of HTML sources
 SOURCES_CSS=$(call file_find,$(PATH_SRC)/css,*.css) ## List of CSS sources
@@ -61,7 +62,7 @@ SOURCES_JSON=$(call file_find,$(PATH_SRC)/json,*.json) ## List of JSON sources
 SOURCES_MD=$(call file_find,$(PATH_SRC)/md,*.md) ## List of JSON sources
 SOURCES_ETC=$(call file_find,$(PATH_SRC)/etc,*) ## List of JSON sources
 ifeq ($(SOURCES_ALL),)
-SOURCES_ALL+=$(foreach _,JS PY HTML CSS CSS_JS XML XSLT,$(SOURCES_$_))
+SOURCES_ALL+=$(foreach _,JS TS PY HTML CSS CSS_JS XML XSLT,$(SOURCES_$_))
 endif
 
 # --

@@ -4,6 +4,10 @@ USE_CLI_CHECK+=|| which $1 2> /dev/null
 default: $(DEFAULT_RULE)
 	@
 
+.PHONY: build
+build: $(BUILD_ALL) ## Builds all outputs in BUILD_ALL
+	@$(call rule_post_cmd)
+
 .PHONY: dist
 dist: $(DIST_ALL)
 	@$(call rule_post_cmd)
@@ -77,9 +81,6 @@ clean: ## Cleans the project, removing build and run files
 		fi
 	done
 
-.PHONY: build
-build: $(BUILD_ALL) ## Builds all outputs in BUILD_ALL
-	@
 
 .PHONY: shell
 shell: ## Opens a shell setup with the environment

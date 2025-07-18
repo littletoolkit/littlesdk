@@ -1,0 +1,2 @@
+Should convert modules to module.{conf,lib,rules}.mk, easier grepping.
+

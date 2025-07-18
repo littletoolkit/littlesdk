@@ -158,6 +158,28 @@ use_cli=$(foreach M,$1 $2 $3 $4 $5 $6 $7,build/cli-$M.task)
 #  `file_find PATH PATTERN`, eg `$(call file_find,src/py,*.py)` will match all
 #  files in `PATH` (recursively) and also matching patterns.
 file_find=$(wildcard $(subst SUF,$(strip $(if $2,$2,.)),$(strip $(subst PRE,$(if $1,$1,.),PRE/SUF PRE/*/SUF PRE/*/*/SUF PRE/*/*/*/SUF PRE/*/*/*/*/SUF PRE/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/*/SUF PRE/*/*/*/*/*/*/*/*/*/SUF))))
+
+# -----------------------------------------------------------------------------
+#
+# SHELL FUNCTIONS
+#
+# -----------------------------------------------------------------------------
+
+# Function: shell_create_if COMMAND FAILMESSAGE? SUCCESS? CLEANUP?
+# - COMMAND: The command to run
+# - FAILMESSAGE: `Command failed: …`
+# - SUCCESS: `touch "$@"`
+# - CLEANUP: `test -e "$@" && unlink "$@"`
+define shell_create_if
+	if $1; then
+		$(if $3,$3,touch "$@")
+	else
+		echo "$(call fmt_error,$(if $2,$2,Command failed: $(subst ",',$1)))"
+		$(if $4,$4,test -e "$@" && unlink "$@")
+		exit 1
+	fi
+endef
+
 # -----------------------------------------------------------------------------
 #
 # FORMATTING FUNCTIONS

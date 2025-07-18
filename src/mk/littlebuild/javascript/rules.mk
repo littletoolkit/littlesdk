@@ -3,15 +3,9 @@
 # NODE (GENERIC)
 # -----------------------------------------------------------------------------
 
-$(PATH_BUILD)/install-node-%.task: ## Installs the given Node module
+$(PATH_BUILD)/install-node-module-%.task: ## Installs the given Node module
 	@$(call rule_pre_cmd)
-	if $(NPM) install  "$*"; then
-		touch "$@"
-	else
-		echo "$(call fmt_error,Unable to install Node module: $*)"
-		test -e "$@" && unlink "$@"
-		exit 1
-	fi
+	$(call shell_create_if,$(NPM) install  "$*",Unable to install Node module: $*)
 
 # -----------------------------------------------------------------------------
 # BUN
@@ -29,12 +23,23 @@ $(PATH_BUILD)/install-bun-%.task:
 	unzip -j $@.zip  -d "$@.files"
 	$(call sh_install_tool,$@.files/bun)
 
-
-dist/www/lib/%.js: src/%.js
+$(PATH_BUILD)/install-bun-module-%.task: ## Installs the given Node module
 	@$(call rule_pre_cmd)
-	if ! bun build --minify "$<" > "$@"; then
-		unlink "$@"
-		exit 1
-	fi
+	$(call shell_create_if,$(BUN) install  "$*",Unable to install Bun module: $*)
 
+$(JS_BUILD_PATH)/%.js: src/ts/%.ts
+	@$(call rule_pre_cmd)
+	$(call shell_create_if,$(BUN) build  --external '*' "$<" > "$@",Unable to compile TypeScript module: $*)
+
+$(JS_DIST_PATH)/%.js: src/ts/%.ts
+	@$(call rule_pre_cmd)
+	$(call shell_create_if,$(BUN) build  --minify --external '*' "$<" > "$@",Unable to compile TypeScript module: $*)
+
+$(JS_BUILD_PATH)/%.js: src/js/%.js
+	@$(call rule_pre_cmd)
+	cp -a "$<" "$@"
+
+$(JS_DIST_PATH)/%.js: src/js/%.js
+	@$(call rule_pre_cmd)
+	$(call shell_create_if,$(BUN) build --minify "$<" > "$@",Unable to compile JavaScript module: $*)
 # EOF
