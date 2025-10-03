@@ -4,6 +4,14 @@ USE_CLI_CHECK+=|| which $1 2> /dev/null
 default: $(DEFAULT_RULE)
 	@
 
+.PHONY: check
+check: $(CHECK_ALL) ## Runs all the checks
+	@$(call rule_post_cmd)
+
+.PHONY: fix
+fix: $(FIX_ALL) ## Runs all the fixes
+	@$(call rule_post_cmd)
+
 .PHONY: build
 build: $(BUILD_ALL) ## Builds all outputs in BUILD_ALL
 	@$(call rule_post_cmd)

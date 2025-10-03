@@ -1,3 +1,30 @@
+# -----------------------------------------------------------------------------
+# RULES
+# -----------------------------------------------------------------------------
+
+define js-linter
+	$(call use_env)
+	if [ -n "$(if $(strip $(SOURCES_JS)),JS)" ]; then
+		echo "$(call fmt_action,Linting: $(SOURCES_JS))"
+		$(call shell_try,$(JS_RUN) @biomejs/biome lint $1 $(SOURCES_JS),Unable to lint JavaScript sources)
+	fi
+	if [ -n "$(if $(strip $(SOURCES_TS)),TS)" ]; then
+		echo "$(call fmt_action,Checking: $(SOURCES_TS))"
+		$(call shell_try,$(JS_RUN) @biomejs/biome check $1 $(SOURCES_TS),Unable to lint TypeScript sources)
+	fi
+endef
+
+
+
+.PHONY: js-check
+js-check: $(SOURCES_TS) $(SOURCES_JS) ## Lints JavaScript and TypeScript sources
+	@$(call js-linter)
+	$(call rule_post_cmd,$<)
+
+.PHONY: js-fix
+js-fix: $(SOURCES_TS) $(SOURCES_JS) ## Lints JavaScript and TypeScript sources
+	@$(call js-linter,--fix)
+	$(call rule_post_cmd,$<)
 
 # -----------------------------------------------------------------------------
 # NODE (GENERIC)

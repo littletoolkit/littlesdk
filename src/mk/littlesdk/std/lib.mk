@@ -1,6 +1,7 @@
 # Core variables
 NULL:=
 SPACE:=$(NULL) $(NULL)
+COMMA:=,
 define EOL
 $(if 1,
 ,)
@@ -165,7 +166,7 @@ file_find=$(wildcard $(subst SUF,$(strip $(if $2,$2,.)),$(strip $(subst PRE,$(if
 #
 # -----------------------------------------------------------------------------
 
-# Function: shell_create_if COMMAND FAILMESSAGE? SUCCESS? CLEANUP?
+# Function: shell_create_if 1:COMMAND 2:FAILMESSAGE? 3:SUCCESS? 4:CLEANUP?
 # - COMMAND: The command to run
 # - FAILMESSAGE: `Command failed: …`
 # - SUCCESS: `touch "$@"`
@@ -174,6 +175,14 @@ define shell_create_if
 	if $1; then
 		$(if $3,$3,touch "$@")
 	else
+		echo "$(call fmt_error,$(if $2,$2,Command failed: $(subst ",',$1)))"
+		$(if $4,$4,test -e "$@" && unlink "$@")
+		exit 1
+	fi
+endef
+
+define shell_try
+	if ! $1; then
 		echo "$(call fmt_error,$(if $2,$2,Command failed: $(subst ",',$1)))"
 		$(if $4,$4,test -e "$@" && unlink "$@")
 		exit 1

@@ -10,6 +10,7 @@ RUN_WWW_ALL+=\
 	$(SOURCES_CSS_JS:$(PATH_SRC)/css/%.js=$(PATH_RUN)/lib/css/%.js)\
 	$(SOURCES_CSS_JS:$(PATH_SRC)/css/%.js=$(PATH_RUN)/lib/css/%.css)\
 	$(SOURCES_JS:$(PATH_SRC)/js/%.js=$(PATH_RUN)/lib/js/%.js)\
+	$(SOURCES_TS:$(PATH_SRC)/ts/%.ts=$(PATH_RUN)/lib/js/%.js)\
 	$(SOURCES_JSON:$(PATH_SRC)/json/%.json=$(PATH_RUN)/lib/json/%.json)
 
 

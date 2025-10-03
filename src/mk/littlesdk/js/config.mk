@@ -24,8 +24,11 @@ NPM?=npm$(if $(NODE_VERSION),-$(NODE_VERSION))
 ## List of Node nodules to use in the form MODULE[=VERSION]
 USE_NODE?=
 
+JS_RUN=$(BUN) x
+
 # TODO: We should make sure we do that with th
 PREP_ALL+=$(foreach M,$(USE_NODE),build/install-node-$M.task)
+
 
 BUILD_JS=\
 	$(patsubst src/js/%,$(JS_BUILD_PATH)/%,$(filter src/js/%,$(SOURCES_JS))) \
@@ -36,6 +39,8 @@ DIST_JS=\
 	$(patsubst src/js/%,$(JS_DIST_PATH)/%,$(filter src/js/%,$(SOURCES_JS))) \
 	$(patsubst src/ts/%.ts,$(JS_DIST_PATH)/%.js,$(filter src/ts/%,$(SOURCES_TS)))
 
+CHECK_ALL+=js-check
+FIX_ALL+=js-fix
 DIST_ALL+=$(DIST_JS)
 
 # EOF

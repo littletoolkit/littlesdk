@@ -24,6 +24,8 @@ BASE_LDLIBRARYPATH?=$(LDLIBRARYPATH)
 # -- ## Phases
 PREP_ALL?=## Dependencies that will be met by `make prep`
 BUILD_ALL?=## Files to be built
+CHECK_ALL?=## Checks that will be run by `make check`
+FIX_ALL?=## Checks that will be run by `make check`
 RUN_ALL?=## Dependencies that will be met by `make run`
 SOURCES_ALL?=## All the source files known by the kit
 PACKAGE_ALL?=## All the files that will be packaged in distributions
