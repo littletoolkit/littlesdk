@@ -14,7 +14,7 @@ LB_PATH:=$(dir $(lastword $(MAKEFILE_LIST)))../..
 MODULES_PATH:=$(patsubst %.mk,%,$(lastword $(MAKEFILE_LIST)))
 MODULES?=$(MODULES_AVAILABLE)
 LB_TITLE?=
-LB_HLO?=🧰 $(BOLD)LittleBuild$(if $(LB_TITLE), ― $(LB_TITLE))$(RESET)
+LB_HLO?=🧰 $(BOLD)LittleSDK$(if $(LB_TITLE), ― $(LB_TITLE))$(RESET)
 LB_LOGGING?=
 
 

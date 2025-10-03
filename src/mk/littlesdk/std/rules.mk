@@ -17,7 +17,7 @@ help: ## This command
 	@$(call rule_pre_cmd)
 	cat << EOF
 	…
-	📖 $(BOLD)LittleBuild$(RESET) phases:
+	📖 $(BOLD)LittleSDK$(RESET) phases:
 	$(call fmt_rule,prep)     ― Installs dependencies & prepares environment
 	$(call fmt_rule,build)    ― Builds all the assets required to run and distribute
 	$(call fmt_rule,run)      ― Runs the project and its dependencies

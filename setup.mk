@@ -1,33 +1,33 @@
 # --
-# Sets up LittleBuild with the given version based on the current directory.
-# This makefile is the front door to sourcing `littlebuild` and ensuring that
+# Sets up LittleSDK with the given version based on the current directory.
+# This makefile is the front door to sourcing `littlesdk` and ensuring that
 # it has the correct version.
 
 ifndef MAKE_VERSION
-$(error !!! ERR − LittleBuild requires GNU make → try running 'gmake' instead)
+$(error !!! ERR − LittleSDK requires GNU make → try running 'gmake' instead)
 endif
 
-LITTLEBUILD_VERSION=main
+LITTLESDK_VERSION=main
 SHELL:=bash
-LITTLEBUILD_PATH:=$(subst //,,$(dir $(lastword $(MAKEFILE_LIST)))/)
-LITTLEBUILD_FLAGS?=
-ifeq ($(filter no-check-version,$(LITTLEBUILD_FLAGS)),)
-$(info $(shell env MAKEFLAGS="--silent" make -f $(LITTLEBUILD_PATH)/setup.mk check-version LITTLEBUILD_FLAGS=no-check-version))
-include $(LITTLEBUILD_PATH)/src/mk/littlebuild.mk
+LITTLESDK_PATH:=$(subst //,,$(dir $(lastword $(MAKEFILE_LIST)))/)
+LITTLESDK_FLAGS?=
+ifeq ($(filter no-check-version,$(LITTLESDK_FLAGS)),)
+$(info $(shell env MAKEFLAGS="--silent" make -f $(LITTLESDK_PATH)/setup.mk check-version LITTLESDK_FLAGS=no-check-version))
+include $(LITTLESDK_PATH)/src/mk/littlesdk.mk
 endif
 
 # --
-# Checks the version for littlebuild
+# Checks the version for littlesdk
 .PHONY: check-version
 check-version:
 	@
-	if [ "$(filter no-check-version,$(LITTLEBUILD_FLAGS))" == "" ]; then
-		this_version=$$(git -C $(LITTLEBUILD_PATH) rev-parse HEAD)
-		that_version=$$(git -C $(LITTLEBUILD_PATH) rev-parse $(LITTLEBUILD_VERSION))
+	if [ "$(filter no-check-version,$(LITTLESDK_FLAGS))" == "" ]; then
+		this_version=$$(git -C $(LITTLESDK_PATH) rev-parse HEAD)
+		that_version=$$(git -C $(LITTLESDK_PATH) rev-parse $(LITTLESDK_VERSION))
 		if [ "$$this_version" != "$$that_version" ]; then
-			echo "--- LittleBuild is at $$that_version [$(LITTLEBUILD_VERSION)] (was $$this_version)"
+			echo "--- LittleSDK is at $$that_version [$(LITTLESDK_VERSION)] (was $$this_version)"
 		else
-			echo "--- LittleBuild is at $$that_version [$(LITTLEBUILD_VERSION)]"
+			echo "--- LittleSDK is at $$that_version [$(LITTLESDK_VERSION)]"
 		fi
 	fi
 
