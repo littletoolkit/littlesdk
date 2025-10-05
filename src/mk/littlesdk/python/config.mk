@@ -6,7 +6,8 @@ USE_PYTHON?=
 PYTHON_VERSION?=3.12
 
 ## Python interpreter
-PYTHON?=python$(PYTHON_VERSION)
+PYTHON?=$(CMD) python
+UV?=$(CMD) uv
 
 PREP_ALL+=$(foreach M,$(USE_PYTHON),build/install-python-$M.task)
 # EOF

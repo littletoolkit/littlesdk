@@ -2,7 +2,7 @@ PORT?=8000
 
 WWW_PATH=$(PATH_DIST)/www
 
-RUN_WWW_ALL+=\
+WWW_RUN_ALL+=\
 	$(SOURCES_HTML:$(PATH_SRC)/html/%.html=$(PATH_RUN)/%.html)\
 	$(SOURCES_XML:$(PATH_SRC)/xml/%.xml=$(PATH_RUN)/%.xml)\
 	$(SOURCES_XSLT:$(PATH_SRC)/xslt/%.xslt=$(PATH_RUN)/lib/xslt/%.xslt)\
@@ -14,7 +14,7 @@ RUN_WWW_ALL+=\
 	$(SOURCES_JSON:$(PATH_SRC)/json/%.json=$(PATH_RUN)/lib/json/%.json)
 
 
-DIST_WWW_ALL=
+WWW_DIST_ALL=
 # DIST_WWW_ALL+=\
 # 	$(SOURCES_HTML:$(PATH_SRC)/html/%.html=$(PATH_DIST)/www/%.html)\
 # 	$(SOURCES_XML:$(PATH_SRC)/xml/%.xml=$(PATH_DIST)/www/%.html)\
@@ -23,8 +23,7 @@ DIST_WWW_ALL=
 # 	$(SOURCES_JS:$(PATH_SRC)/js/%.js=$(PATH_DIST)/www/lib/js/%.js)\
 # 	$(SOURCES_JSON:$(PATH_SRC)/json/%.json=$(PATH_DIST)/www/lib/json/%.json)
 #
-DIST_ALL+=$(DIST_WWW_ALL)
-RUN_ALL+=$(RUN_WWW_ALL)
-DIST_ALL+=$(DIST_WWW_ALL)
+DIST_ALL+=$(WWW_DIST_ALL)
+RUN_ALL+=$(WWW_RUN_ALL) www-run
 # EOF
 

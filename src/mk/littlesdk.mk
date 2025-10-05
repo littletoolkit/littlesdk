@@ -10,20 +10,20 @@ MAKEFLAGS+=--no-builtin-rules
 # --
 # We load the standard library, at which point we'll
 # be able to load the modules
-LB_PATH:=$(dir $(lastword $(MAKEFILE_LIST)))../..
+SDK_PATH:=$(dir $(lastword $(MAKEFILE_LIST)))../..
 MODULES_PATH:=$(patsubst %.mk,%,$(lastword $(MAKEFILE_LIST)))
 MODULES?=$(MODULES_AVAILABLE)
-LB_TITLE?=
-LB_HLO?=🧰 $(BOLD)LittleSDK$(if $(LB_TITLE), ― $(LB_TITLE))$(RESET)
-LB_LOGGING?=
+SDK_TITLE?=
+SDK_HLO?=🧰 $(BOLD)LittleSDK$(if $(SDK_TITLE), ― $(SDK_TITLE))$(RESET)
+SDK_LOGGING?=quiet
 
 
 # We load the standard library first
 include $(MODULES_PATH)/std/lib.mk
 include $(MODULES_PATH)/std/config.mk
-$(info ┉┅━┅┉ ━━━ $(LB_HLO)$(RESET))
+$(info ┉┅━┅┉ ━━━ $(SDK_HLO)$(RESET))
 
-def-include=$(EOL)$(if $(filter quiet,$(LB_LOGGING)),,$(info $(call fmt_action,Load $(call fmt_module,$1))))$(EOL)include $1
+def-include=$(EOL)$(if $(filter quiet,$(SDK_LOGGING)),,$(info $(call fmt_action,Load $(call fmt_module,$1))))$(EOL)include $1
 # FIXME: That won't work if we have modules found elsewhere than MODULES_PATH
 define def-module-load
 $(if $(wildcard src/mk/$1),$(call def-include,src/mk/$1))

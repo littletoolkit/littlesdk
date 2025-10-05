@@ -93,7 +93,7 @@ endef
 # A generic function to be used when writing a rule. This will create the
 # parent directories for build rules, and log messages for other rules.
 define rule_post_cmd
-	echo "       ⤷  $(if $1,🗅 × $(words $1) : $(BOLD)$(strip $1),$@)$(RESET)"
+	echo "       ⤷  $(if $1,🗅 × $(words $1) : $(BOLD)$(strip $1),Made 🖸  $(BOLD)$@$(RESET) ← ($^))$(RESET)"
 endef
 
 # -----------------------------------------------------------------------------

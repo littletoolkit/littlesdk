@@ -19,12 +19,19 @@ endef
 .PHONY: js-check
 js-check: $(SOURCES_TS) $(SOURCES_JS) ## Lints JavaScript and TypeScript sources
 	@$(call js-linter)
-	$(call rule_post_cmd,$<)
+	$(call rule_post_cmd,$^)
 
 .PHONY: js-fix
 js-fix: $(SOURCES_TS) $(SOURCES_JS) ## Lints JavaScript and TypeScript sources
 	@$(call js-linter,--fix)
-	$(call rule_post_cmd,$<)
+	$(call rule_post_cmd,$^)
+
+.PHONY: js-test
+js-test: $(TESTS_TS) $(TESTS_JS) ## Runs JavaScript and TypeScript tests
+	@$(BUN) test $(TESTS_TS) $(TESTS_JS)
+	$(call rule_post_cmd,$^)
+
+
 
 # -----------------------------------------------------------------------------
 # NODE (GENERIC)

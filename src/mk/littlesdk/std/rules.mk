@@ -2,11 +2,18 @@ USE_CLI_CHECK+=|| which $1 2> /dev/null
 
 .PHONY: default
 default: $(DEFAULT_RULE)
-	@
+
+.PHONY: lint
+lint: check ## Alias to `check`
+	@@
 
 .PHONY: check
 check: $(CHECK_ALL) ## Runs all the checks
 	@$(call rule_post_cmd)
+
+.PHONY: fmt
+fmt: fix ## Alias to `fix`
+	@
 
 .PHONY: fix
 fix: $(FIX_ALL) ## Runs all the fixes
@@ -14,6 +21,10 @@ fix: $(FIX_ALL) ## Runs all the fixes
 
 .PHONY: build
 build: $(BUILD_ALL) ## Builds all outputs in BUILD_ALL
+	@$(call rule_post_cmd)
+
+.PHONY: test
+test: $(TEST_ALL) ## Builds all tests
 	@$(call rule_post_cmd)
 
 .PHONY: dist
@@ -92,7 +103,7 @@ clean: ## Cleans the project, removing build and run files
 
 .PHONY: shell
 shell: ## Opens a shell setup with the environment
-	@env -i TERM=$(TERM) "PATH=$(ENV_PATH)" "PYTHONPATH=$(ENV_PYTHONPATH)" bash --noprofile --rcfile "$(LB_PATH)/src/sh/std.prompt.sh"
+	@env -i TERM=$(TERM) "PATH=$(ENV_PATH)" "PYTHONPATH=$(ENV_PYTHONPATH)" bash --noprofile --rcfile "$(SDK_PATH)/src/sh/std.prompt.sh"
 
 .PHONY: live-%
 live-%:
@@ -108,7 +119,7 @@ def-%:
 	@$(info $(BOLD)$*=$(RESET)$(EOL)$(value $*)$(EOL)$(BOLD)END$(RESET))
 
 # --
-# Ensures thath teh given CLI tool is instatlled
+# Ensures thath teh given CLI tool is installed
 $(PATH_BUILD)/cli-%.task:
 	CLI_PATH="$$(test -e "run/bin/$*" && echo "run/bin/$*" $(call USE_CLI_CHECK,$*) || true)"
 	if [ -z "$$CLI_PATH" ]; then

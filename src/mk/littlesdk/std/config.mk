@@ -12,14 +12,22 @@ PATH_DEPS?=deps
 # --
 # Where assets are built
 PATH_BUILD?=build
+
 # --
 # Where distribution assets are built
 PATH_DIST?=dist
+
+# --
+# Where tests are located
+PATH_TESTS?=tests
 
 # -- ## Environment
 BASE_PATH?=$(PATH)
 BASE_PYTHONPATH?=$(PYTHONPATH)
 BASE_LDLIBRARYPATH?=$(LDLIBRARYPATH)
+
+# -- ## Commands
+CMD=mise x --
 
 # -- ## Phases
 PREP_ALL?=## Dependencies that will be met by `make prep`
@@ -27,6 +35,7 @@ BUILD_ALL?=## Files to be built
 CHECK_ALL?=## Checks that will be run by `make check`
 FIX_ALL?=## Checks that will be run by `make check`
 RUN_ALL?=## Dependencies that will be met by `make run`
+TEST_ALL?=## Dependencies that will be met by `make test`
 SOURCES_ALL?=## All the source files known by the kit
 PACKAGE_ALL?=## All the files that will be packaged in distributions
 DIST_ALL?=## All the distribution files
@@ -63,6 +72,13 @@ SOURCES_XSLT=$(call file_find,$(PATH_SRC)/xslt,*.xslt) ## List of XSLT sources
 SOURCES_JSON=$(call file_find,$(PATH_SRC)/json,*.json) ## List of JSON sources
 SOURCES_MD=$(call file_find,$(PATH_SRC)/md,*.md) ## List of JSON sources
 SOURCES_ETC=$(call file_find,$(PATH_SRC)/etc,*) ## List of JSON sources
+
+# --
+# ## Tests
+
+TESTS_TS=$(call file_find,$(PATH_TESTS),*.ts) ## List of TypeScript tests
+TESTS_JS=$(call file_find,$(PATH_TESTS),*.js) ## List of TypeScript tests
+
 ifeq ($(SOURCES_ALL),)
 SOURCES_ALL+=$(foreach _,JS TS PY HTML CSS CSS_JS XML XSLT,$(SOURCES_$_))
 endif
