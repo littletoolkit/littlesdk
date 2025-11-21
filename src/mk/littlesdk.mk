@@ -15,23 +15,28 @@ MODULES_PATH:=$(patsubst %.mk,%,$(lastword $(MAKEFILE_LIST)))
 MODULES?=$(MODULES_AVAILABLE)
 SDK_TITLE?=
 SDK_HLO?=🧰 $(BOLD)LittleSDK$(if $(SDK_TITLE), ― $(SDK_TITLE))$(RESET)
-SDK_LOGGING?=quiet
+SDK_LOGGING?=all
 
-
-# We load the standard library first
 include $(MODULES_PATH)/std/lib.mk
-include $(MODULES_PATH)/std/config.mk
+
 $(info ┉┅━┅┉ ━━━ $(SDK_HLO)$(RESET))
 
 def-include=$(EOL)$(if $(filter quiet,$(SDK_LOGGING)),,$(info $(call fmt_action,Load $(call fmt_module,$1))))$(EOL)include $1
 # FIXME: That won't work if we have modules found elsewhere than MODULES_PATH
 define def-module-load
-$(if $(wildcard src/mk/$1),$(call def-include,src/mk/$1))
+$(if $(wildcard src/mk/$(subst .mk,.pre.mk,$1)),$(call def-include,src/mk/$(subst .mk,.pre.mk,$1)))
+$(if $(filter config.mk,$1),$(if $(wildcard src/mk/$1),$(call def-include,src/mk/$1)))
+# NOTE: We skip the std module here, as it's already loaded
 $(foreach K,$(filter-out std,$(MODULES)),$(if $(wildcard $(MODULES_PATH)/$K/$1),$(call def-include,$(MODULES_PATH)/$K/$1)))
+$(if $(filter rules.mk,$1),$(if $(wildcard src/mk/$1),$(call def-include,src/mk/$1)))
+$(if $(wildcard src/mk/$(subst .mk,.post.mk,$1)),$(call def-include,src/mk/$(subst .mk,.post.mk,$1)))
 endef
+
+# We load the standard library first
+$(eval $(call def-include,$(MODULES_PATH)/std/config.mk))
 $(eval $(call def-module-load,config.mk))
 # Standard rules are loaded first
-include $(MODULES_PATH)/std/rules.mk
+$(eval $(call def-include,$(MODULES_PATH)/std/rules.mk))
 $(eval $(call def-module-load,rules.mk))
 
 #

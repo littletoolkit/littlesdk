@@ -14,11 +14,22 @@ define js-linter
 	fi
 endef
 
+define ts-linter
+	if [ -n "$(wildcard tsconfig.json)" ]; then
+		echo "$(call fmt_action,Type checking: $(SOURCES_TS))"
+		$(call shell_try,$(JS_RUN) tsc --noEmit,Unable to lint TypeScript sources)
+	fi
+endef
 
 
 .PHONY: js-check
 js-check: $(SOURCES_TS) $(SOURCES_JS) ## Lints JavaScript and TypeScript sources
 	@$(call js-linter)
+	$(call ts-linter)
+	$(call rule_post_cmd,$^)
+
+js-typecheck: $(SOURCES_TS) $(SOURCES_JS) ## Lints JavaScript and TypeScript sources
+	@$(call ts-linter)
 	$(call rule_post_cmd,$^)
 
 .PHONY: js-fix
@@ -32,6 +43,13 @@ js-test: $(TESTS_TS) $(TESTS_JS) ## Runs JavaScript and TypeScript tests
 	$(call rule_post_cmd,$^)
 
 
+
+.PHONY: js-info
+js-info: ## Shows TypeScript project configuratino
+	@if [ -n "$(wildcard tsconfig.json)" ]; then
+		echo "$(call fmt_action,TypeScript sources: tsconfig.json)"
+		$(call shell_try,$(JS_RUN) tsc --noEmit --listFiles,Unable to show TypeScript configuration)
+	fi
 
 # -----------------------------------------------------------------------------
 # NODE (GENERIC)
@@ -76,4 +94,5 @@ $(JS_BUILD_PATH)/%.js: src/js/%.js
 $(JS_DIST_PATH)/%.js: src/js/%.js
 	@$(call rule_pre_cmd)
 	$(call shell_create_if,$(BUN) build --minify "$<" > "$@",Unable to compile JavaScript module: $*)
+
 # EOF

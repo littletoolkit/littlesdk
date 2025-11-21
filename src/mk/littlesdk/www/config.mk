@@ -24,6 +24,6 @@ WWW_DIST_ALL=
 # 	$(SOURCES_JSON:$(PATH_SRC)/json/%.json=$(PATH_DIST)/www/lib/json/%.json)
 #
 DIST_ALL+=$(WWW_DIST_ALL)
-RUN_ALL+=$(WWW_RUN_ALL) www-run
+RUN_ALL+=$(WWW_RUN_ALL)
 # EOF
 

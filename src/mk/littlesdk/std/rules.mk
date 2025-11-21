@@ -2,13 +2,14 @@ USE_CLI_CHECK+=|| which $1 2> /dev/null
 
 .PHONY: default
 default: $(DEFAULT_RULE)
+	@
 
 .PHONY: lint
 lint: check ## Alias to `check`
-	@@
+	@
 
 .PHONY: check
-check: $(CHECK_ALL) ## Runs all the checks
+check: $(PREP_ALL) $(CHECK_ALL) ## Runs all the checks
 	@$(call rule_post_cmd)
 
 .PHONY: fmt
@@ -20,7 +21,11 @@ fix: $(FIX_ALL) ## Runs all the fixes
 	@$(call rule_post_cmd)
 
 .PHONY: build
-build: $(BUILD_ALL) ## Builds all outputs in BUILD_ALL
+build: $(PREP_ALL) $(BUILD_ALL) ## Builds all outputs in BUILD_ALL
+	@$(call rule_post_cmd)
+
+.PHONY: run
+run: $(PREP_ALL) $(RUN_ALL) ## Runs the project
 	@$(call rule_post_cmd)
 
 .PHONY: test
