@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# --
+# Script: sdk-typecheck
+# Types checks the given file or otherwise the whole project.
+# --
+set -euo pipefail
+BASE="$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"/../.. &>/dev/null && pwd)"
+SDK_PATH=${SDK_PATH:-${BASE}/deps/sdk}
+source "$SDK_PATH/src/sh/lib.sh"
+sdk_lib_load log
+
+BUN=${BUN:-mise x -- bun}
+
+# Function: sdk_typecheck_ts
+# Type checks the given TypeScript files.
+function sdk_typecheck_ts {
+	# NOTE: TypeScript is really quite annoying to work with, and basically
+	# you need to create a dedicated `tsconfig.json` file to typecheck
+	# specific files only, as the `--project` flag does not accept file.
+	TS_CONFIG="$(mktemp "$BASE"/tsconfig.check.XXXXXX.json)"
+	echo '{
+	  "extends": "./tsconfig.json",
+	  "compilerOptions": {
+			"noEmit": true,
+			"baseUrl": "."
+	  },
+	  "exclude": [],
+	  "include": [' >"$TS_CONFIG"
+	for FILE in "$@"; do
+		echo "    \"${FILE//\\/\\\\}\"," >>"$TS_CONFIG"
+	done
+	echo '     "__eof__"
+	  ]
+	}' >>"$TS_CONFIG"
+	$BUN x tsc -p "$TS_CONFIG" --noEmit || unlink "$TS_CONFIG"
+	if [ -e "$TS_CONFIG" ]; then
+		unlink "$TS_CONFIG"
+		echo "EOK"
+	else
+		echo "EFAIL"
+	fi
+}
+
+# Function: sdk_typecheck_ts_all
+# Type checks all TypeScript files in the project.
+function sdk_typecheck_ts_all {
+	$BUN x tsc -p "tsconfig.json" --noEmit
+}
+
+# Main
+if [ $# -eq 0 ]; then
+	if [ -e "tsconfig.json" ]; then
+		sdk_typecheck_ts_all
+	fi
+else
+	for ARG in "$@"; do
+		case "$ARG" in
+		*.ts | *.tsx)
+			sdk_typecheck_ts "$ARG"
+			;;
+		*)
+			exit 1
+			;;
+		esac
+	done
+fi
+
+# EOF - vim: syn=bash
