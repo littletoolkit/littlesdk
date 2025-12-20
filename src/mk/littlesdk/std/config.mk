@@ -84,10 +84,6 @@ SOURCES_ALL+=$(foreach _,JS TS PY HTML CSS CSS_JS XML XSLT,$(SOURCES_$_))
 endif
 
 # --
-# The prefix used in logging output
-FMT_PREFIX?=[kit]
-
-# --
 # Lists all source files defined in the modules like `std/lib.mk std/vars.mk`
 MODULES_SOURCES:=$(patsubst $(MODULES_PATH)/%,%,$(wildcard $(MODULES_PATH)/*/*.mk))
 

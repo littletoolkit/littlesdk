@@ -16,6 +16,8 @@ MODULES?=$(MODULES_AVAILABLE)
 SDK_TITLE?=
 SDK_HLO?=🧰 $(BOLD)LittleSDK$(if $(SDK_TITLE), ― $(SDK_TITLE))$(RESET)
 SDK_LOGGING?=all
+# The prefix used in logging output
+FMT_PREFIX?=[kit]
 
 include $(MODULES_PATH)/std/lib.mk
 
