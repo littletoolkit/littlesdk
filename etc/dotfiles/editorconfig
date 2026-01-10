@@ -1,16 +1,16 @@
-[*.py]
-indent_style = tab
-indent_size = 4
-
 [*.js]
 indent_style = tab
 indent_size = 4
 
-[*.ts]
+[*.sh]
 indent_style = tab
 indent_size = 4
 
-[*.tsx]
+[*.md]
+indent_style = space
+indent_size = 2
+
+[*.py]
 indent_style = tab
 indent_size = 4
 

@@ -6,11 +6,11 @@ define js-linter
 	$(call use_env)
 	if [ -n "$(if $(strip $(SOURCES_JS)),JS)" ]; then
 		echo "$(call fmt_action,Linting: $(SOURCES_JS))"
-		$(call shell_try,$(JS_RUN) @biomejs/biome lint $1 $(SOURCES_JS),Unable to lint JavaScript sources)
+		$(call shell_try,$(JS_RUN) @biomejs/biome lint --config-path=$(abspath $(SDK_PATH)/etc/biome.jsonc) $1 $(SOURCES_JS),Unable to lint JavaScript sources)
 	fi
 	if [ -n "$(if $(strip $(SOURCES_TS)),TS)" ]; then
 		echo "$(call fmt_action,Checking: $(SOURCES_TS))"
-		$(call shell_try,$(JS_RUN) @biomejs/biome check $1 $(SOURCES_TS),Unable to lint TypeScript sources)
+		$(call shell_try,$(JS_RUN) @biomejs/biome check --config-path=$(abspath $(SDK_PATH)/etc/biome.jsonc) $1 $(SOURCES_TS),Unable to lint TypeScript sources)
 	fi
 endef
 
