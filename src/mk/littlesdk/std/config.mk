@@ -18,6 +18,13 @@ PATH_BUILD?=build
 PATH_DIST?=dist
 
 # --
+# Distribution mode controls what gets included in dist output.
+# Supports multiple space-separated modes:
+#   js:module - Include individual JS modules in dist/lib/js/*
+#   js:bundle - Include bundled JS assets in dist/www/
+DIST_MODE?=js:module
+
+# --
 # Where tests are located
 PATH_TESTS?=tests
 
@@ -70,8 +77,10 @@ SOURCES_CSS_JS=$(call file_find,$(PATH_SRC)/css,*.js) ## List of CSS/JS sources
 SOURCES_XML=$(call file_find,$(PATH_SRC)/xml,*.xml) ## List of XML sources
 SOURCES_XSLT=$(call file_find,$(PATH_SRC)/xslt,*.xslt) ## List of XSLT sources
 SOURCES_JSON=$(call file_find,$(PATH_SRC)/json,*.json) ## List of JSON sources
-SOURCES_MD=$(call file_find,$(PATH_SRC)/md,*.md) ## List of JSON sources
-SOURCES_ETC=$(call file_find,$(PATH_SRC)/etc,*) ## List of JSON sources
+SOURCES_MD=$(call file_find,$(PATH_SRC)/md,*.md) ## List of Markdown sources
+SOURCES_DATA=$(call file_find,$(PATH_SRC)/data,*) ## List of data files
+SOURCES_STATIC=$(call file_find,$(PATH_SRC)/static,*) ## List of static files
+SOURCES_ETC=$(call file_find,$(PATH_SRC)/etc,*) ## List of etc files
 
 # --
 # ## Tests

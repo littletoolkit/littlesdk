@@ -1,0 +1,46 @@
+#!/usr/bin/env bun
+// File: sdk-extract-icons
+// Extracts icon references from source files and fetches icon data from Iconify API
+
+import { readFileSync } from "fs"
+
+const sources = process.argv.slice(2)
+const icons = new Set<string>()
+
+// Extract icon="..." patterns from all source files
+for (const file of sources) {
+	try {
+		const content = readFileSync(file, "utf8")
+		const matches = content.matchAll(/icon="([^"]+)"/g)
+		for (const m of matches) {
+			icons.add(m[1])
+		}
+	} catch {
+		// Skip files that can't be read
+	}
+}
+
+// Group icons by prefix
+const byPrefix: Record<string, string[]> = {}
+for (const icon of icons) {
+	const [prefix, name] = icon.split(":")
+	if (prefix && name) {
+		;(byPrefix[prefix] ??= []).push(name)
+	}
+}
+
+// Fetch icon data from Iconify API
+const result: Record<string, unknown> = {}
+for (const [prefix, names] of Object.entries(byPrefix)) {
+	const url = `https://api.iconify.design/${prefix}.json?icons=${names.join(",")}`
+	try {
+		const response = await fetch(url)
+		const data = await response.json()
+		result[prefix] = data
+	} catch (err) {
+		console.error(`Failed to fetch icons for prefix ${prefix}:`, err)
+	}
+}
+
+console.log(JSON.stringify(result))
+// EOF -- vim: ts=4 sw=4 noet syn=typescript

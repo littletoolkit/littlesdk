@@ -5,6 +5,22 @@ JS_DIST_PATH?=dist/lib/js
 JS_BUILD_PATH?=build/lib/js
 
 # --
+# Project name (defaults to current directory name)
+PROJECT?=$(notdir $(CURDIR))
+
+# --
+# Bundle configuration for standalone production builds
+JS_BUNDLE_ENTRY?=
+JS_BUNDLE_OUTPUT?=dist/www/$(PROJECT).min.js
+JS_BUNDLE_DEBUG_OUTPUT?=dist/www/$(PROJECT).js
+JS_BUNDLE_EXTERNAL?=
+
+# --
+# Icons configuration (for iconify bundling)
+JS_BUNDLE_ICONS_OUTPUT?=build/icons.json
+JS_BUNDLE_ICONS_SOURCES?=$(SOURCES_TS)
+
+# --
 # The version of Bun, can be the revision number like `1.1.13` or
 # `latest`.
 BUN_VERSION?=latest
@@ -41,6 +57,7 @@ DIST_JS=\
 TEST_ALL+=js-test
 CHECK_ALL+=js-check
 FIX_ALL+=js-fix
-DIST_ALL+=$(DIST_JS)
+# Only add individual JS modules if DIST_MODE contains "js:module"
+DIST_ALL+=$(if $(findstring js:module,$(DIST_MODE)),$(DIST_JS))
 
 # EOF

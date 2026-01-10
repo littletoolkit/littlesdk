@@ -36,6 +36,46 @@ test: $(TEST_ALL) ## Builds all tests
 dist: $(DIST_ALL)
 	@$(call rule_post_cmd)
 
+.PHONY: dist-info
+dist-info: ## Shows distribution files with sizes and total
+	@$(call rule_pre_cmd)
+	total_size=0
+	file_count=0
+	missing_count=0
+	echo ""
+	echo "$(BOLD)Distribution files$(RESET) (DIST_ALL):"
+	echo ""
+	for file in $(DIST_ALL); do
+		if [ -f "$$file" ]; then
+			size=$$(stat -c%s "$$file")
+			total_size=$$((total_size + size))
+			file_count=$$((file_count + 1))
+			if [ $$size -ge 1048576 ]; then
+				human_size=$$(printf "%.1fM" $$(echo "scale=1; $$size / 1048576" | bc))
+			elif [ $$size -ge 1024 ]; then
+				human_size=$$(printf "%.1fK" $$(echo "scale=1; $$size / 1024" | bc))
+			else
+				human_size="$${size}B"
+			fi
+			printf "  %8s  %s\n" "$$human_size" "$$file"
+		else
+			missing_count=$$((missing_count + 1))
+			printf "  %8s  %s\n" "$(DIM)missing$(RESET)" "$$file"
+		fi
+	done
+	echo ""
+	if [ $$total_size -ge 1048576 ]; then
+		human_total=$$(printf "%.2fM" $$(echo "scale=2; $$total_size / 1048576" | bc))
+	elif [ $$total_size -ge 1024 ]; then
+		human_total=$$(printf "%.2fK" $$(echo "scale=2; $$total_size / 1024" | bc))
+	else
+		human_total="$${total_size}B"
+	fi
+	echo "$(BOLD)Total$(RESET): $$file_count files, $$human_total ($$total_size bytes)"
+	if [ $$missing_count -gt 0 ]; then
+		echo "$(call fmt_tip,$$missing_count files missing. Run $(BOLD)make dist$(RESET) to create them)"
+	fi
+
 .PHONY: help
 help: ## This command
 	@$(call rule_pre_cmd)

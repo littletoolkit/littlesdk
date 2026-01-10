@@ -95,4 +95,68 @@ $(JS_DIST_PATH)/%.js: src/js/%.js
 	@$(call rule_pre_cmd)
 	$(call shell_create_if,$(BUN) build --minify "$<" > "$@",Unable to compile JavaScript module: $*)
 
+# -----------------------------------------------------------------------------
+# BUNDLE (Standalone production build)
+# -----------------------------------------------------------------------------
+
+# Convert JS_BUNDLE_EXTERNAL space-separated list to --external flags
+JS_BUNDLE_EXTERNAL_FLAGS=$(foreach M,$(JS_BUNDLE_EXTERNAL),--external '$M')
+
+# Extract icons from source files and fetch from Iconify API
+$(JS_BUNDLE_ICONS_OUTPUT): $(JS_BUNDLE_ICONS_SOURCES)
+	@$(call rule_pre_cmd)
+	@mkdir -p $(dir $@)
+	$(SDK_PATH)/bin/sdk-extract-icons $(JS_BUNDLE_ICONS_SOURCES) > $@
+
+# Build the standalone bundle (depends on icons extraction)
+# NOTE: We use --outdir instead of --outfile because some dependencies (like loro-crdt)
+# include WASM files that get extracted as separate assets during bundling.
+$(JS_BUNDLE_OUTPUT): $(JS_BUNDLE_ENTRY) $(SOURCES_TS) $(JS_BUNDLE_ICONS_OUTPUT)
+	@$(call rule_pre_cmd)
+	@if [ -z "$(JS_BUNDLE_ENTRY)" ]; then \
+		echo "$(call fmt_error,JS_BUNDLE_ENTRY not set. Set it to your entry point.)"; \
+		exit 1; \
+	fi
+	@mkdir -p $(dir $@)
+	$(BUN) build $(JS_BUNDLE_ENTRY) \
+		--bundle \
+		--minify \
+		--target=browser \
+		--format=esm \
+		$(JS_BUNDLE_EXTERNAL_FLAGS) \
+		--outdir=$(dir $@) \
+		--entry-naming=$(notdir $@)
+	@if [ ! -f "$@" ]; then \
+		echo "$(call fmt_error,Bundle output not found: $@)"; \
+		exit 1; \
+	fi
+
+.PHONY: js-bundle
+js-bundle: $(JS_BUNDLE_OUTPUT) ## Creates a minified standalone JS bundle
+	@$(call rule_post_cmd,$(JS_BUNDLE_OUTPUT))
+
+# Build the debug bundle (no minification, preserves symbols for debugging)
+$(JS_BUNDLE_DEBUG_OUTPUT): $(JS_BUNDLE_ENTRY) $(SOURCES_TS) $(JS_BUNDLE_ICONS_OUTPUT)
+	@$(call rule_pre_cmd)
+	@if [ -z "$(JS_BUNDLE_ENTRY)" ]; then \
+		echo "$(call fmt_error,JS_BUNDLE_ENTRY not set. Set it to your entry point.)"; \
+		exit 1; \
+	fi
+	@mkdir -p $(dir $@)
+	$(BUN) build $(JS_BUNDLE_ENTRY) \
+		--bundle \
+		--target=browser \
+		--format=esm \
+		$(JS_BUNDLE_EXTERNAL_FLAGS) \
+		--outdir=$(dir $@) \
+		--entry-naming=$(notdir $@)
+	@if [ ! -f "$@" ]; then \
+		echo "$(call fmt_error,Debug bundle output not found: $@)"; \
+		exit 1; \
+	fi
+
+.PHONY: js-bundle-debug
+js-bundle-debug: $(JS_BUNDLE_DEBUG_OUTPUT) ## Creates a non-minified JS bundle for debugging
+	@$(call rule_post_cmd,$(JS_BUNDLE_DEBUG_OUTPUT))
+
 # EOF
