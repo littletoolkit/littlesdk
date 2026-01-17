@@ -197,6 +197,7 @@ endef
 
 fmt_prefix=$(BOLD)$(FMT_PREFIX)$(RESET)
 fmt_error=$(COLOR_ERROR)$(FMT_PREFIX)$(RESET)
+fmt_warn =$(COLOR_WARNING)$(FMT_PREFIX)$(RESET) $1$(RESET)
 fmt_tip   =$(call fmt_prefix)$(SPACE)👉   $1$(RESET)
 fmt_action=$(call fmt_prefix)  →  $1$(RESET)
 fmt_result=$(call fmt_prefix)  ←  $1$(RESET)

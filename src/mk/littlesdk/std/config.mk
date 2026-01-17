@@ -81,6 +81,7 @@ SOURCES_MD=$(call file_find,$(PATH_SRC)/md,*.md) ## List of Markdown sources
 SOURCES_DATA=$(call file_find,$(PATH_SRC)/data,*) ## List of data files
 SOURCES_STATIC=$(call file_find,$(PATH_SRC)/static,*) ## List of static files
 SOURCES_ETC=$(call file_find,$(PATH_SRC)/etc,*) ## List of etc files
+SOURCES_DOTFILES=$(call file_find,$(SDK_PATH)/etc/dotfiles,*) ## List of dotfiles in SDK
 
 # --
 # ## Tests
