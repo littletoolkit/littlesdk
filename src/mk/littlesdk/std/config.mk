@@ -18,6 +18,10 @@ PATH_BUILD?=build
 PATH_DIST?=dist/package
 
 # --
+# Revision identifier for distributions
+REVISION?=$(shell git rev-parse --short HEAD)
+
+# --
 # Distribution mode controls what gets included in dist output.
 # Supports multiple space-separated modes:
 #   js:module - Include individual JS modules in dist/lib/js/*

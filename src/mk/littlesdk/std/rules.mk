@@ -36,6 +36,25 @@ test: $(TEST_ALL) ## Builds all tests
 dist: $(DIST_ALL)
 	@$(call rule_post_cmd)
 
+dist/$(PROJECT)-$(REVISION).tar.xz: dist
+	@$(call rule_pre_cmd)
+	# Find the most recent mtime
+	latest_mtime=$$(find $(PATH_DIST) -type f -exec stat -c '%Y' {} \; | sort -n | tail -1)
+	if [ -z "$$latest_mtime" ]; then
+		echo "$(call fmt_error,No files found in $(PATH_DIST))"
+		exit 1
+	fi
+	# Set all files to readonly and same timestamp
+	find $(PATH_DIST) -type f -exec chmod 444 {} \;
+	find $(PATH_DIST) -type f -exec touch --date=@$$latest_mtime {} \;
+	find $(PATH_DIST) -type d -exec chmod 555 {} \;
+	# Create tarball with max compression, stripping dist/package
+	tar cJf $@ -C $(PATH_DIST) .
+	@$(call rule_post_cmd,$@)
+
+.PHONY: dist-package
+dist-package: dist/$(PROJECT)-$(REVISION).tar.xz
+
 .PHONY: dist-info
 dist-info: ## Shows distribution files with sizes and total
 	@$(call rule_pre_cmd)
