@@ -1,3 +1,7 @@
+# --
+# Project name (defaults to current directory name)
+PROJECT?=$(notdir $(CURDIR))
+
 DEFAULT_RULE?=help
 
 # --

@@ -5,10 +5,6 @@ JS_DIST_PATH?=$(PATH_DIST)/lib/js
 JS_BUILD_PATH?=build/lib/js
 
 # --
-# Project name (defaults to current directory name)
-PROJECT?=$(notdir $(CURDIR))
-
-# --
 # Bundle configuration for standalone production builds
 JS_BUNDLE_ENTRY?=
 JS_BUNDLE_OUTPUT?=$(PATH_DIST)/www/$(PROJECT).min.js
@@ -19,6 +15,10 @@ JS_BUNDLE_EXTERNAL?=
 # Icons configuration (for iconify bundling)
 JS_BUNDLE_ICONS_OUTPUT?=build/icons.json
 JS_BUNDLE_ICONS_SOURCES?=$(SOURCES_TS)
+
+# FIXME: Too specific, needs to be reworked
+JS_SERVER_ENTRY?=
+JS_SERVER_OUTPUT?=dist/bin/$(PROJECT)-server
 
 # --
 # The version of Bun, can be the revision number like `1.1.13` or

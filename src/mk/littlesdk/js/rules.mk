@@ -42,14 +42,25 @@ js-test: $(TESTS_TS) $(TESTS_JS) ## Runs JavaScript and TypeScript tests
 	@$(BUN) test $(TESTS_TS) $(TESTS_JS)
 	$(call rule_post_cmd,$^)
 
-
-
 .PHONY: js-info
 js-info: ## Shows TypeScript project configuratino
 	@if [ -n "$(wildcard tsconfig.json)" ]; then
 		echo "$(call fmt_action,TypeScript sources: tsconfig.json)"
 		$(call shell_try,$(JS_RUN) tsc --noEmit --listFiles,Unable to show TypeScript configuration)
 	fi
+
+.PHONY: js-bundle
+js-bundle: $(JS_BUNDLE_OUTPUT) ## Creates a minified standalone JS bundle
+	@$(call rule_post_cmd,$(JS_BUNDLE_OUTPUT))
+
+.PHONY: js-bundle-debug
+js-bundle-debug: $(JS_BUNDLE_DEBUG_OUTPUT) ## Creates a non-minified JS bundle for debugging
+	@$(call rule_post_cmd,$(JS_BUNDLE_DEBUG_OUTPUT))
+
+# TODO: Should detect if there's a server
+.PHONY: js-server
+js-server: $(JS_SERVER_OUTPUT) ## Builds a standalone server executable
+	@$(call rule_post_cmd,$(JS_SERVER_OUTPUT))
 
 # -----------------------------------------------------------------------------
 # NODE (GENERIC)
@@ -131,10 +142,6 @@ $(JS_BUNDLE_OUTPUT): $(JS_BUNDLE_ENTRY) $(SOURCES_TS) $(JS_BUNDLE_ICONS_OUTPUT)
 		exit 1; \
 	fi
 
-.PHONY: js-bundle
-js-bundle: $(JS_BUNDLE_OUTPUT) ## Creates a minified standalone JS bundle
-	@$(call rule_post_cmd,$(JS_BUNDLE_OUTPUT))
-
 # Build the debug bundle (no minification, preserves symbols for debugging)
 $(JS_BUNDLE_DEBUG_OUTPUT): $(JS_BUNDLE_ENTRY) $(SOURCES_TS) $(JS_BUNDLE_ICONS_OUTPUT)
 	@$(call rule_pre_cmd)
@@ -155,16 +162,9 @@ $(JS_BUNDLE_DEBUG_OUTPUT): $(JS_BUNDLE_ENTRY) $(SOURCES_TS) $(JS_BUNDLE_ICONS_OU
 		exit 1; \
 	fi
 
-.PHONY: js-bundle-debug
-js-bundle-debug: $(JS_BUNDLE_DEBUG_OUTPUT) ## Creates a non-minified JS bundle for debugging
-	@$(call rule_post_cmd,$(JS_BUNDLE_DEBUG_OUTPUT))
-
 # -----------------------------------------------------------------------------
 # SERVER (Standalone executable)
 # -----------------------------------------------------------------------------
-
-JS_SERVER_ENTRY?=
-JS_SERVER_OUTPUT?=dist/bin/$(PROJECT)-server
 
 # Compile standalone server executable using Bun
 $(JS_SERVER_OUTPUT): $(JS_SERVER_ENTRY) $(SOURCES_TS)
@@ -180,9 +180,5 @@ $(JS_SERVER_OUTPUT): $(JS_SERVER_ENTRY) $(SOURCES_TS)
 		echo "$(call fmt_error,Server executable not executable: $@)"; \
 		exit 1; \
 	fi
-
-.PHONY: js-server
-js-server: $(JS_SERVER_OUTPUT) ## Builds a standalone server executable
-	@$(call rule_post_cmd,$(JS_SERVER_OUTPUT))
 
 # EOF
