@@ -15,7 +15,7 @@ PATH_BUILD?=build
 
 # --
 # Where distribution assets are built
-PATH_DIST?=dist
+PATH_DIST?=dist/package
 
 # --
 # Distribution mode controls what gets included in dist output.

@@ -1,7 +1,7 @@
 # TODO: Support switching between Node and Bun as the runtime
 
 JS_RUNTIME?=bun
-JS_DIST_PATH?=dist/lib/js
+JS_DIST_PATH?=$(PATH_DIST)/lib/js
 JS_BUILD_PATH?=build/lib/js
 
 # --
@@ -11,8 +11,8 @@ PROJECT?=$(notdir $(CURDIR))
 # --
 # Bundle configuration for standalone production builds
 JS_BUNDLE_ENTRY?=
-JS_BUNDLE_OUTPUT?=dist/www/$(PROJECT).min.js
-JS_BUNDLE_DEBUG_OUTPUT?=dist/www/$(PROJECT).js
+JS_BUNDLE_OUTPUT?=$(PATH_DIST)/www/$(PROJECT).min.js
+JS_BUNDLE_DEBUG_OUTPUT?=$(PATH_DIST)/www/$(PROJECT).js
 JS_BUNDLE_EXTERNAL?=
 
 # --
