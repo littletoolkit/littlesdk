@@ -36,7 +36,7 @@ test: $(TEST_ALL) ## Builds all tests
 dist: $(DIST_ALL)
 	@$(call rule_post_cmd)
 
-dist/$(PROJECT)-$(REVISION).tar.bz2: dist
+dist/$(PROJECT)-$(REVISION).tar.gz: dist
 	@$(call rule_pre_cmd)
 	# Find the most recent mtime
 	latest_mtime=$$(find $(PATH_DIST) -type f -exec stat -c '%Y' {} \; | sort -n | tail -1)
@@ -48,8 +48,8 @@ dist/$(PROJECT)-$(REVISION).tar.bz2: dist
 	find $(PATH_DIST) -type f -exec chmod 444 {} \;
 	find $(PATH_DIST) -type f -exec touch --date=@$$latest_mtime {} \;
 	find $(PATH_DIST) -type d -exec chmod 555 {} \;
-	# Create tarball with max compression, stripping dist/package
-	if ! tar cjf $@ -C $(PATH_DIST) .; then
+	# Create tarball with compression, stripping dist/package
+	if ! $(CMD) tar czf $@ -C $(PATH_DIST) .; then
 		rm -f $@
 		echo "$(call fmt_error,Failed to create tarball)"
 		exit 1
@@ -57,7 +57,7 @@ dist/$(PROJECT)-$(REVISION).tar.bz2: dist
 	@$(call rule_post_cmd,$@)
 
 .PHONY: dist-package
-dist-package: dist/$(PROJECT)-$(REVISION).tar.bz2
+dist-package: dist/$(PROJECT)-$(REVISION).tar.gz
 
 .PHONY: dist-info
 dist-info: ## Shows distribution files with sizes and total
