@@ -54,9 +54,10 @@ DIST_JS=\
 	$(patsubst src/js/%,$(JS_DIST_PATH)/%,$(filter src/js/%,$(SOURCES_JS))) \
 	$(patsubst src/ts/%.ts,$(JS_DIST_PATH)/%.js,$(filter src/ts/%,$(SOURCES_TS)))
 
-TEST_ALL+=js-test
-CHECK_ALL+=js-check
-FIX_ALL+=js-fix
+TEST_ALL+=$(if $(SOURCES_JS)$(SOURCES_TS),js-test)
+CHECK_ALL+=$(if $(SOURCES_JS)$(SOURCES_TS),js-check)
+FIX_ALL+=$(if $(SOURCES_JS)$(SOURCES_TS),js-fix)
+
 # Only add individual JS modules if DIST_MODE contains "js:module"
 DIST_ALL+=$(if $(findstring js:module,$(DIST_MODE)),$(DIST_JS))
 # Add server executable if JS_SERVER_ENTRY is set
