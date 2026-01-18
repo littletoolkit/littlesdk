@@ -1,5 +1,5 @@
 ---
-name: stylereview-ts
+name: review-ts
 description: Review and update module documentation using NaturalDocs-style format with markdown.
 ---
 
@@ -78,6 +78,7 @@ export { {{name}} }
 - **Function/Method docs**: Embed parameters in description using backticks; include examples for factory functions and complex APIs
 - **Exports**: Named exports listed at file end with explicit `// EOF` marker
 - **Examples**: Always use fenced code blocks with language specifier; comment style for examples matches the surrounding code
+- **Visibility**: Don't use private/protected, but group internal operations together with a SUBSECTION
 
 ### Examples
 
