@@ -49,7 +49,11 @@ dist/$(PROJECT)-$(REVISION).tar.xz: dist
 	find $(PATH_DIST) -type f -exec touch --date=@$$latest_mtime {} \;
 	find $(PATH_DIST) -type d -exec chmod 555 {} \;
 	# Create tarball with max compression, stripping dist/package
-	tar cJf $@ -C $(PATH_DIST) .
+	if ! tar cJf $@ -C $(PATH_DIST) .; then
+		rm -f $@
+		echo "$(call fmt_error,Failed to create tarball)"
+		exit 1
+	fi
 	@$(call rule_post_cmd,$@)
 
 .PHONY: dist-package
