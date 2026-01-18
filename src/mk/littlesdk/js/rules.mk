@@ -159,4 +159,30 @@ $(JS_BUNDLE_DEBUG_OUTPUT): $(JS_BUNDLE_ENTRY) $(SOURCES_TS) $(JS_BUNDLE_ICONS_OU
 js-bundle-debug: $(JS_BUNDLE_DEBUG_OUTPUT) ## Creates a non-minified JS bundle for debugging
 	@$(call rule_post_cmd,$(JS_BUNDLE_DEBUG_OUTPUT))
 
+# -----------------------------------------------------------------------------
+# SERVER (Standalone executable)
+# -----------------------------------------------------------------------------
+
+JS_SERVER_ENTRY?=
+JS_SERVER_OUTPUT?=dist/bin/$(PROJECT)-server
+
+# Compile standalone server executable using Bun
+$(JS_SERVER_OUTPUT): $(JS_SERVER_ENTRY) $(SOURCES_TS)
+	@$(call rule_pre_cmd)
+	@if [ -z "$(JS_SERVER_ENTRY)" ]; then \
+		echo "$(call fmt_error,JS_SERVER_ENTRY not set. Set it to your server entry point.)"; \
+		exit 1; \
+	fi
+	@mkdir -p $(dir $@)
+	$(BUN) build --compile --outfile $@ $(JS_SERVER_ENTRY)
+	@chmod +x $@
+	@if [ ! -x "$@" ]; then \
+		echo "$(call fmt_error,Server executable not executable: $@)"; \
+		exit 1; \
+	fi
+
+.PHONY: js-server
+js-server: $(JS_SERVER_OUTPUT) ## Builds a standalone server executable
+	@$(call rule_post_cmd,$(JS_SERVER_OUTPUT))
+
 # EOF

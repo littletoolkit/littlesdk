@@ -59,5 +59,7 @@ CHECK_ALL+=js-check
 FIX_ALL+=js-fix
 # Only add individual JS modules if DIST_MODE contains "js:module"
 DIST_ALL+=$(if $(findstring js:module,$(DIST_MODE)),$(DIST_JS))
+# Add server executable if JS_SERVER_ENTRY is set
+DIST_ALL+=$(if $(JS_SERVER_ENTRY),$(JS_SERVER_OUTPUT))
 
 # EOF
