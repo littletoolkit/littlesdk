@@ -36,7 +36,13 @@ test: $(TEST_ALL) ## Builds all tests
 dist: $(DIST_ALL)
 	@$(call rule_post_cmd)
 
-dist/$(PROJECT)-$(REVISION).tar.gz: dist
+# Reusable function for creating compressed archives
+# Parameters:
+#   $1 = target archive file
+#   $2 = compression format (gz, bz2, xz)
+#   $3 = compression flag (z, j, J)
+#   $4 = compression level
+define create_compressed_archive
 	@$(call rule_pre_cmd)
 	# Find the most recent mtime
 	latest_mtime=$$(find $(PATH_DIST) -type f -exec stat -c '%Y' {} \; | sort -n | tail -1)
@@ -45,14 +51,14 @@ dist/$(PROJECT)-$(REVISION).tar.gz: dist
 		exit 1
 	fi
 	# Create temporary directory with desired permissions for archiving
-	# This preserves original file permissions while setting archive permissions
 	temp_dist="$$(mktemp -d)"
-	cp -r $(PATH_DIST)/* "$$temp_dist"/
-	find "$$temp_dist" -type f -exec chmod 444 {} \;
+	cp -rp $(PATH_DIST)/* "$$temp_dist"/
+	find "$$temp_dist" -type f -executable -exec chmod 555 {} \;
+	find "$$temp_dist" -type f ! -executable -exec chmod 444 {} \;
 	find "$$temp_dist" -type d -exec chmod 555 {} \;
-	# Create tarball with compression from temporary directory
-	if ! $(CMD) tar czf $@ --mtime="@$$latest_mtime" -C "$$temp_dist" .; then
-		rm -f $@
+	# Create tarball with specified compression
+	if ! $(CMD) tar c$3f $1 --mtime="@$$latest_mtime" -C "$$temp_dist" .; then
+		rm -f $1
 		chmod -R u+w "$$temp_dist"
 		rm -rf "$$temp_dist"
 		echo "$(call fmt_error,[STD] Failed to create tarball)"
@@ -61,10 +67,30 @@ dist/$(PROJECT)-$(REVISION).tar.gz: dist
 	# Restore write permissions for cleanup and remove temporary directory
 	chmod -R u+w "$$temp_dist"
 	rm -rf "$$temp_dist"
-	@$(call rule_post_cmd,$@)
+	@$(call rule_post_cmd,$1)
+endef
+
+# Ensure PATH_DIST directory exists
+$(PATH_DIST):
+	@mkdir -p $@
+
+# Archive targets using the reusable function
+dist/$(PROJECT)-$(REVISION).tar.gz: $(DIST_ALL) $(MAKEFILE_LIST) | $(PATH_DIST)
+	$(call create_compressed_archive,$@,gz,z,$(COMPRESS_GZ_LEVEL))
+
+dist/$(PROJECT)-$(REVISION).tar.bz2: $(DIST_ALL) $(MAKEFILE_LIST) | $(PATH_DIST)
+	$(call create_compressed_archive,$@,bz2,j,$(COMPRESS_BZ2_LEVEL))
+
+dist/$(PROJECT)-$(REVISION).tar.xz: $(DIST_ALL) $(MAKEFILE_LIST) | $(PATH_DIST)
+	$(call create_compressed_archive,$@,xz,J,$(COMPRESS_XZ_LEVEL))
 
 .PHONY: dist-package
-dist-package: dist/$(PROJECT)-$(REVISION).tar.gz
+dist-package: $(DIST_PACKAGES)
+
+.PHONY: dist-package-gz dist-package-bz2 dist-package-xz
+dist-package-gz: dist/$(PROJECT)-$(REVISION).tar.gz
+dist-package-bz2: dist/$(PROJECT)-$(REVISION).tar.bz2
+dist-package-xz: dist/$(PROJECT)-$(REVISION).tar.xz
 
 .PHONY: dist-info
 dist-info: ## Shows distribution files with sizes and total

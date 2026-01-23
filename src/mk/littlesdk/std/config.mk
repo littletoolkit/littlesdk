@@ -54,6 +54,13 @@ TEST_ALL?=## Dependencies that will be met by `make test`
 SOURCES_ALL?=## All the source files known by the kit
 PACKAGE_ALL?=## All the files that will be packaged in distributions
 DIST_ALL?=## All the distribution files
+DIST_PACKAGES=$(addprefix dist/$(PROJECT)-$(REVISION).tar., $(DIST_FORMATS))
+
+# Compression formats and levels for distribution archives
+DIST_FORMATS?=bz2 ## Supports: bz2, gz, xz
+COMPRESS_GZ_LEVEL?=9 ## Compression level for gzip (1-9, 9=best)
+COMPRESS_BZ2_LEVEL?=9 ## Compression level for bzip2 (1-9, 9=best)
+COMPRESS_XZ_LEVEL?=9 ## Compression level for xz (0-9, 9=best)
 
 # --
 # This manages the dependencies (in deps/). When dependencies follow conventions,
