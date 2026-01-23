@@ -41,19 +41,26 @@ dist/$(PROJECT)-$(REVISION).tar.gz: dist
 	# Find the most recent mtime
 	latest_mtime=$$(find $(PATH_DIST) -type f -exec stat -c '%Y' {} \; | sort -n | tail -1)
 	if [ -z "$$latest_mtime" ]; then
-		echo "$(call fmt_error,No files found in $(PATH_DIST))"
+		echo "$(call fmt_error,[STD] No files found in $(PATH_DIST))"
 		exit 1
 	fi
-	# Set all files to readonly and same timestamp
-	find $(PATH_DIST) -type f -exec chmod 444 {} \;
-	find $(PATH_DIST) -type f -exec touch --date=@$$latest_mtime {} \;
-	find $(PATH_DIST) -type d -exec chmod 555 {} \;
-	# Create tarball with compression, stripping dist/package
-	if ! $(CMD) tar czf $@ -C $(PATH_DIST) .; then
+	# Create temporary directory with desired permissions for archiving
+	# This preserves original file permissions while setting archive permissions
+	temp_dist="$$(mktemp -d)"
+	cp -r $(PATH_DIST)/* "$$temp_dist"/
+	find "$$temp_dist" -type f -exec chmod 444 {} \;
+	find "$$temp_dist" -type d -exec chmod 555 {} \;
+	# Create tarball with compression from temporary directory
+	if ! $(CMD) tar czf $@ --mtime="@$$latest_mtime" -C "$$temp_dist" .; then
 		rm -f $@
-		echo "$(call fmt_error,Failed to create tarball)"
+		chmod -R u+w "$$temp_dist"
+		rm -rf "$$temp_dist"
+		echo "$(call fmt_error,[STD] Failed to create tarball)"
 		exit 1
 	fi
+	# Restore write permissions for cleanup and remove temporary directory
+	chmod -R u+w "$$temp_dist"
+	rm -rf "$$temp_dist"
 	@$(call rule_post_cmd,$@)
 
 .PHONY: dist-package
@@ -96,7 +103,7 @@ dist-info: ## Shows distribution files with sizes and total
 	fi
 	echo "$(BOLD)Total$(RESET): $$file_count files, $$human_total ($$total_size bytes)"
 	if [ $$missing_count -gt 0 ]; then
-		echo "$(call fmt_tip,$$missing_count files missing. Run $(BOLD)make dist$(RESET) to create them)"
+		echo "$(call fmt_tip,[STD] $$missing_count files missing. Run $(BOLD)make dist$(RESET) to create them)"
 	fi
 
 .PHONY: help
@@ -160,10 +167,10 @@ clean: ## Cleans the project, removing build and run files
 	for dir in build run dist $(CLEAN_ALL); do
 		if [ -d "$$dir" ]; then
 			count=$$(find $$dir -name '*' | wc -l)
-			echo "$(call fmt_action,Cleaning up directory: $(call fmt_path,$$dir)) [$$count]"
+			echo "$(call fmt_action,[STD] Cleaning up directory: $(call fmt_path,$$dir)) [$$count]"
 			rm -rf "$$dir"
 		elif [ -e "$$dir" ]; then
-			echo "$(call fmt_action,Cleaning up file: $(call fmt_path,$$dir))"
+			echo "$(call fmt_action,[STD] Cleaning up file: $(call fmt_path,$$dir))"
 			unlink "$$dir"
 		fi
 	done
@@ -187,17 +194,17 @@ def-%:
 	@$(info $(BOLD)$*=$(RESET)$(EOL)$(value $*)$(EOL)$(BOLD)END$(RESET))
 
 # --
-# Ensures thath teh given CLI tool is installed
+# Ensures thah the given CLI tool is installed
 $(PATH_BUILD)/cli-%.task:
 	CLI_PATH="$$(test -e "run/bin/$*" && echo "run/bin/$*" $(call USE_CLI_CHECK,$*) || true)"
 	if [ -z "$$CLI_PATH" ]; then
-		echo "$(call fmt_error,Could not find CLI tool: $*)"
+		echo "$(call fmt_error,[STD] Could not find CLI tool: $*)"
 		test -e "$@" && unlink "$@"
 		exit 1
 	else
 		mkdir -p "$(dir $@)"
 		echo "$$CLI_PATH" > "$@"
 		touch --date=@0 "$@"
-		echo "$(call fmt_result,OK: $$CLI_PATH)"
+		echo "$(call fmt_result,[STD] OK: $$CLI_PATH)"
 	fi
 # EOX
