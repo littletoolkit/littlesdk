@@ -5,6 +5,14 @@ JS_DIST_PATH?=$(PATH_DIST)/lib/js
 JS_BUILD_PATH?=build/lib/js
 
 # --
+# Project name (defaults to current directory name)
+PROJECT?=$(notdir $(CURDIR))
+
+# --
+# Server entry point for standalone executable
+JS_SERVER_ENTRY?=
+
+# --
 # Bundle configuration for standalone production builds
 JS_BUNDLE_ENTRY?=
 JS_BUNDLE_OUTPUT?=$(PATH_DIST)/www/$(PROJECT).min.js

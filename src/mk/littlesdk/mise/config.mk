@@ -5,7 +5,7 @@ MISE_QUIET?=0
 
 # --
 # Version for `mise`
-MISE_VERSION?=v2025.2.3
+MISE_VERSION?=v2026.1.5
 
 MISE_BIN=$(PATH_BIN)/bin/mise-$(MISE_VERSION)
 
