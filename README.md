@@ -24,57 +24,35 @@ LittleSDK provides a structured approach to project management, offering a set o
 
 ### Prerequisites
 
-- **Make**: Ensure `make` is installed on your system.
-- **Bash**: Required for shell scripts.
-- **Git**: For version control and dependency management.
+- `gmake` (GNU make, 4.4+)
+- `coreutils` (GNU)
+- `bash`: Required for shell scripts.
+- `git`: For version control and dependency management.
 
 ### Installation
 
-1. Clone the repository:
-
-   ```bash
-   git clone git@github.com:sebastien/littlesdk.git
-   cd littlesdk
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   make prep
-   ```
-
-3. Build the project:
-
-   ```bash
-   make build
-   ```
+```bash
+# Clone
+mkdir -p deps/sdk
+git clone git@github.com:littletoolkit/littlesdk.git deps/sdk
+# Copy the template
+cp deps/sdk/Makefile.template .
+# Get started
+make help
+```
 
 ### Usage
 
-- **Build the project**:
-  ```bash
-  make build
-  ```
+- Prepare: `make prep`
+- Build: `make build`
+- Run: `make run`
+- Shell: `make shell`
+- Check: `make check`
+- Format: `make fmt`
+- Test: `make test`
+- Distribute: `make dist`
+- Package: `make dist-package`
 
-- **Run the project**:
-  ```bash
-  make run
-  ```
-
-- **Create distributions**:
-  ```bash
-  make dist
-  ```
-
-- **Open a development shell**:
-  ```bash
-  make shell
-  ```
-
-- **View available commands**:
-  ```bash
-  make help
-  ```
 
 ## Project Structure
 
@@ -94,40 +72,29 @@ src/
     └── lib-colors.sh     # Color definitions
 ```
 
-## Makefile Modules
+## Modules
 
-### Core Modules
-- **`littlesdk.mk`**: Core configuration and module loading.
-- **`std/config.mk`**: Standard configuration variables.
-- **`std/rules.mk`**: Standard build rules and targets.
-- **`std/lib.mk`**: Standard library functions.
-- **`std/colors.mk`**: Color definitions for Makefile output.
+Core:
+- `std`, core functions and lifecycle
 
-### Task-Specific Modules
-- **`prep/rules.mk`**: Rules for preparing the environment.
-- **`py/rules.mk`**: Python-specific build rules.
-- **`js/rules.mk`**: JavaScript-specific build rules.
-- **`www/rules.mk`**: Web-specific build rules.
-- **`secrets/rules.mk`**: Secrets management rules.
-- **`github/rules.mk`**: GitHub-specific rules.
-- **`cloudflare/rules.mk`**: Cloudflare-specific rules.
-- **`appdeploy/rules.mk`**: Application deployment rules.
+ Languages:
+- `py`, python support
+- `js`, JavaScript (Node, Bun) support
+- `www`, HTML/CSS static files
 
-## Shell Scripts
-
-- **`install.sh`**: Installs dependencies and sets up the environment.
-- **`std.prompt.sh`**: Configures the shell prompt for a better development experience.
-- **`lib.sh`**: Library for loading shell modules dynamically.
-- **`lib-colors.sh`**: Defines color variables for shell output.
+Integrations:
+- `secrets`, LittleSecrets integration
+- `github`, GitHub Integration
+- `cloudflare`, CloudFlare integration
+- `appdeploy`, AppDeploy integration
+- `mise`, Mise-En-Place integration
 
 ## Configuration
 
-### Environment Variables
-
-- **`PATH_SRC`**: Directory for source files (default: `src`).
-- **`PATH_RUN`**: Directory for runtime files (default: `run`).
-- **`PATH_DEPS`**: Directory for dependencies (default: `deps`).
-- **`PATH_BUILD`**: Directory for build artifacts (default: `build`).
-- **`PATH_DIST`**: Directory for distribution files (default: `dist/package`).
+- `PATH_SRC`: Directory for source files (default: `src`).
+- `PATH_RUN`: Directory for runtime files (default: `run`).
+- `PATH_DEPS`: Directory for dependencies (default: `deps`).
+- `PATH_BUILD`: Directory for build artifacts (default: `build`).
+- `PATH_DIST`: Directory for distribution files (default: `dist/package`).
 
 
