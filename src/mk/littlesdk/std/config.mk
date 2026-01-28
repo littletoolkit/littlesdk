@@ -86,6 +86,7 @@ ENV_PYTHONPATH=$(realpath $(PATH_SRC)/py):$(DEPS_PYTHONPATH):$(BASE_PYTHONPATH)
 SOURCES_JS=$(call file_find,$(PATH_SRC)/js,*.js) ## List of JavaScript sources
 SOURCES_TS=$(call file_find,$(PATH_SRC)/ts,*.ts) ## List of JavaScript sources
 SOURCES_PY=$(call file_find,$(PATH_SRC)/py,*.py) ## List of Python sources
+SOURCES_MK=$(call file_find,$(PATH_SRC)/mk,*.mk) ## List of Makefile sources
 SOURCES_HTML=$(call file_find,$(PATH_SRC)/html,*.html) ## List of HTML sources
 SOURCES_CSS=$(call file_find,$(PATH_SRC)/css,*.css) ## List of CSS sources
 SOURCES_CSS_JS=$(call file_find,$(PATH_SRC)/css,*.js) ## List of CSS/JS sources
@@ -101,9 +102,10 @@ SOURCES_DOTFILES=$(call file_find,$(SDK_PATH)/etc/dotfiles,*) ## List of dotfile
 # --
 # ## Tests
 
-TESTS_TS=$(call file_find,$(PATH_TESTS),*.ts) ## List of TypeScript tests
-TESTS_JS=$(call file_find,$(PATH_TESTS),*.js) ## List of JavaScript tests
-TESTS_PY=$(call file_find,$(PATH_TESTS),*.py) ## List of Python tests
+TESTS_TS=$(call file_find,$(PATH_TESTS),*.test.ts) ## List of TypeScript tests
+TESTS_JS=$(call file_find,$(PATH_TESTS),*.test.js) ## List of JavaScript tests
+TESTS_PY=$(call file_find,$(PATH_TESTS),*.test.py) ## List of Python tests
+TESTS_ALL?=$(foreach _,JS TS PY,$(TESTS_$_)) ## All test files
 
 ifeq ($(SOURCES_ALL),)
 SOURCES_ALL+=$(foreach _,JS TS PY HTML CSS CSS_JS XML XSLT,$(SOURCES_$_))

@@ -62,7 +62,7 @@ DIST_JS=\
 	$(patsubst src/js/%,$(JS_DIST_PATH)/%,$(filter src/js/%,$(SOURCES_JS))) \
 	$(patsubst src/ts/%.ts,$(JS_DIST_PATH)/%.js,$(filter src/ts/%,$(SOURCES_TS)))
 
-TEST_ALL+=$(if $(SOURCES_JS)$(SOURCES_TS),js-test)
+TEST_ALL+=$(if $(TESTS_JS)$(TESTS_TS),js-test)
 CHECK_ALL+=$(if $(SOURCES_JS)$(SOURCES_TS),js-check)
 FIX_ALL+=$(if $(SOURCES_JS)$(SOURCES_TS),js-fix)
 

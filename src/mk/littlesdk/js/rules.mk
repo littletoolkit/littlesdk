@@ -39,7 +39,10 @@ js-fix: $(SOURCES_TS) $(SOURCES_JS) ## Lints JavaScript and TypeScript sources
 
 .PHONY: js-test
 js-test: $(TESTS_TS) $(TESTS_JS) ## Runs JavaScript and TypeScript tests
-	@$(BUN) test $(TESTS_TS) $(TESTS_JS)
+	@$(call rule_pre_cmd)
+	@if [ -n "$(strip $(TESTS_TS) $(TESTS_JS))" ]; then \
+		$(BUN) test $(TESTS_TS) $(TESTS_JS); \
+	fi
 	$(call rule_post_cmd,$^)
 
 .PHONY: js-info

@@ -83,7 +83,7 @@ define rule_pre_cmd
 			echo "$(call fmt_action,Does $(call fmt_rule,$@)) …"
 			;;
 		*)
-			echo "$(call fmt_action,Done $(call fmt_rule,$@)) ✔ "
+			echo "$(call fmt_action,Make $(call fmt_rule,$@)) …"
 		;;
 	esac
 	$(call use_env)
