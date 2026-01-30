@@ -124,7 +124,8 @@ PREP_ALL+=$(PREP_SDK)
 TESTS_TS=$(call file_find,$(PATH_TESTS),*.test.ts) ## List of TypeScript tests
 TESTS_JS=$(call file_find,$(PATH_TESTS),*.test.js) ## List of JavaScript tests
 TESTS_PY=$(call file_find,$(PATH_TESTS),*.test.py) ## List of Python tests
-TESTS_ALL?=$(foreach _,JS TS PY,$(TESTS_$_)) ## All test files
+TESTS_SH=$(call file_find,$(PATH_TESTS),*.test.sh) ## List of shell tests
+TESTS_ALL?=$(foreach _,JS TS PY SH,$(TESTS_$_)) ## All test files
 
 ifeq ($(SOURCES_ALL),)
 SOURCES_ALL+=$(foreach _,JS TS PY HTML CSS CSS_JS XML XSLT,$(SOURCES_$_))

@@ -33,7 +33,21 @@ run: $(PREP_ALL) $(RUN_ALL) ## Runs the project
 	@$(call rule_post_cmd)
 
 .PHONY: test
-test: $(PREP_ALL) $(TEST_ALL) ## Builds all tests
+test: $(PREP_ALL) $(TEST_ALL) ## Runs tests
+	@$(call rule_pre_cmd)
+	failed_tests=0
+	for test in $(TESTS_SH); do
+		echo "$(call fmt_action,[TEST] Running $$test)"
+		if ! bash "$$test"; then
+			echo "$(call fmt_error,[TEST] FAILED: $$test)"
+			failed_tests=$$((failed_tests + 1))
+		fi
+	done
+	if [ $$failed_tests -gt 0 ]; then
+		echo "$(call fmt_error,[TEST] $$failed_tests test(s) failed)"
+		exit 1
+	fi
+	@echo "$(call fmt_result,[TEST] All tests passed)"
 	@$(call rule_post_cmd)
 
 .PHONY: dist
