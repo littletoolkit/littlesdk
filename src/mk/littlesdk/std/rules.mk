@@ -4,6 +4,10 @@ USE_CLI_CHECK+=|| which $1 2> /dev/null
 default: $(DEFAULT_RULE)
 	@
 
+.PHONY: prep
+prep: $(PREP_ALL) ## Alias to `prep`
+	@
+
 .PHONY: lint
 lint: check ## Alias to `check`
 	@
@@ -17,7 +21,7 @@ fmt: fix ## Alias to `fix`
 	@
 
 .PHONY: fix
-fix: $(FIX_ALL) ## Runs all the fixes
+fix: $(PREP_ALL) $(FIX_ALL) ## Runs all the fixes
 	@$(call rule_post_cmd)
 
 .PHONY: build
@@ -29,11 +33,11 @@ run: $(PREP_ALL) $(RUN_ALL) ## Runs the project
 	@$(call rule_post_cmd)
 
 .PHONY: test
-test: $(TEST_ALL) ## Builds all tests
+test: $(PREP_ALL) $(TEST_ALL) ## Builds all tests
 	@$(call rule_post_cmd)
 
 .PHONY: dist
-dist: $(DIST_ALL)
+dist: $(PREP_ALL) $(DIST_ALL)
 	@$(call rule_post_cmd)
 
 # Reusable function for creating compressed archives
@@ -215,6 +219,10 @@ live-%:
 print-%:
 	@$(info $(BOLD)$*=$(RESET)$(EOL)$(strip $($*))$(EOL)$(BOLD)END$(RESET))
 
+.PHONY: list-%
+list-%:
+	@$(info $(BOLD)$*=$(RESET)$(EOL)$(foreach V,$(strip $($*)),$V$(EOL))$(EOL)$(BOLD)END$(RESET))
+
 .PHONY: def-%
 def-%:
 	@$(info $(BOLD)$*=$(RESET)$(EOL)$(value $*)$(EOL)$(BOLD)END$(RESET))
@@ -233,4 +241,35 @@ $(PATH_BUILD)/cli-%.task:
 		touch --date=@0 "$@"
 		echo "$(call fmt_result,[STD] OK: $$CLI_PATH)"
 	fi
-# EOX
+
+
+# Links dotfiles, prefixed with a dot
+define prep-link
+$(EOL)
+$(1): $(2)
+	@$$(call rule_pre_cmd)
+	if [ -d "$$<" ]; then
+		if ! mkdir -p "$$@"; then
+			echo "$(call fmt_error,[SDK] This should be a directory $(call fmt_path,$$@): unable to create it)"
+			exit 1
+		fi
+	elif [ -e "$$@" ]; then
+		if [ -L "$$@" ]; then
+			unlink "$$@"
+		else
+			echo "$(call fmt_warn,[SDK] Skipping file $(call fmt_path,$$@): already exists and is not a symlink)"
+			exit 0
+		fi
+	else
+		mkdir -p "$$(dir $$@)";
+		ln -sfr "$$<" "$$@";
+	fi
+$(EOL)
+endef
+
+# --
+# Links configuration files
+$(eval $(call prep-link,.%,$(SDK_PATH)/etc/_%))
+$(eval $(call prep-link,%,$(SDK_PATH)/etc/%))
+$(eval $(foreach F,$(strip $(PREP_SDK)),$(call prep-link,$F,$(SDK_PATH)/etc/$(patsubst .%,_%,$F))))
+# EOF

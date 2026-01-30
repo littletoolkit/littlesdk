@@ -10,7 +10,8 @@ MAKEFLAGS+=--no-builtin-rules
 # --
 # We load the standard library, at which point we'll
 # be able to load the modules
-SDK_PATH:=$(dir $(lastword $(MAKEFILE_LIST)))../..
+_SDK_PATH:=$(subst $(realpath .)/,,$(realpath $(dir $(lastword $(MAKEFILE_LIST)))../..))
+SDK_PATH:=$(if $(_SDK_PATH),$(_SDK_PATH),./)
 MODULES_PATH:=$(patsubst %.mk,%,$(lastword $(MAKEFILE_LIST)))
 MODULES?=$(MODULES_AVAILABLE)
 SDK_TITLE?=

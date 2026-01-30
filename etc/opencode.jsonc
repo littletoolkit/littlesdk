@@ -1,0 +1,16 @@
+// NOTE: This is managed by the SDK and is readonly
+{
+	"$schema": "https://opencode.ai/config.json",
+	"instructions": [".opencode/rules/*"],
+	"mcp": {
+		// Lattice MCP helps reduce token consumption.
+		// SEE: https://yogthos.net/posts/2026-01-16-lattice-mcp.html
+		// You can validate this with: opencode mcp list | grep lattice-mcp
+		"lattice": {
+			"type": "local",
+			"command": ["bun", "x", "-y", "lattice-mcp"],
+			"enabled": true,
+		},
+	},
+}
+// EOF

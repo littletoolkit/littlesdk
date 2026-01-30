@@ -4,6 +4,15 @@ PROJECT?=$(notdir $(CURDIR))
 
 DEFAULT_RULE?=help
 
+
+## Alias to Git
+GIT?=git
+
+## Forces non-interactive mode
+NO_INTERACTIVE?=
+
+## Removes color output
+NO_COLOR?=
 # --
 # Where the sources are
 PATH_SRC?=src
@@ -97,8 +106,18 @@ SOURCES_MD=$(call file_find,$(PATH_SRC)/md,*.md) ## List of Markdown sources
 SOURCES_DATA=$(call file_find,$(PATH_SRC)/data,*) ## List of data files
 SOURCES_STATIC=$(call file_find,$(PATH_SRC)/static,*) ## List of static files
 SOURCES_ETC=$(call file_find,$(PATH_SRC)/etc,*) ## List of etc files
-SOURCES_DOTFILES=$(call file_find,$(SDK_PATH)/etc/dotfiles,*) ## List of dotfiles in SDK
 
+
+
+SDK_DOTFILES=$(filter $(SDK_PATH)/etc/_%,$(call file_find,$(SDK_PATH)/etc,*)) ## List of dotfiles in SDK
+SDK_ETCFILES=$(filter-out $(SDK_PATH)/etc/_%,$(call file_find,$(SDK_PATH)/etc,*)) ## List of dotfiles in SDK
+
+PREP_SDK=\
+	$(SDK_DOTFILES:$(SDK_PATH)/etc/_%=.%)\
+	$(SDK_ETCFILES:$(SDK_PATH)/etc/%=%)
+PREP_SDK_FILE=$(foreach F,$(PREP_SDK),$(if $(wildcard $F/*),DIR=$F,NOTDIR=$F))
+
+PREP_ALL+=$(PREP_SDK)
 # --
 # ## Tests
 
