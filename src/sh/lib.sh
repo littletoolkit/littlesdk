@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-LITTLESECRETS_LIB_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
-LITTLESECRETS_LIB_MODULES=$(find "$LITTLESECRETS_LIB_PATH" -name "*.sh")
-LITTLESECRETS_LIB_LOADED=
-export LITTLESECRETS_LIB_MODULES
+SDK_LIB_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+SDK_LIB_MODULES=$(find "$SDK_LIB_PATH" -name "*.sh")
+SDK_LIB_LOADED=
+export SDK_LIB_MODULES
 
-function ls_lib_load {
+function sdk_lib_load {
 	local module_path=""
 	for module in "$@"; do
-		module_path=$LITTLESECRETS_LIB_PATH/$module.sh
+		module_path=$SDK_LIB_PATH/lib-$module.sh
 		# Actually, following that advice breaks the code
 		# shellcheck disable=SC2076
-		if ! [[ "$LITTLESECRETS_LIB_LOADED" =~ "[$module]" ]]; then
+		if ! [[ "$SDK_LIB_LOADED" =~ "[$module]" ]]; then
 			if [ -e "$module_path" ]; then
-				LITTLESECRETS_LIB_LOADED+="[$module]"
+				SDK_LIB_LOADED+="[$module]"
 				# shellcheck source=/dev/null
 				source "$module_path"
 			else

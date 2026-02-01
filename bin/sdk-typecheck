@@ -4,8 +4,8 @@
 # Types checks the given file or otherwise the whole project.
 # --
 set -euo pipefail
-BASE="$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"/../.. &>/dev/null && pwd)"
-SDK_PATH=${SDK_PATH:-${BASE}/deps/sdk}
+BASE="$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"/../../.. &>/dev/null && pwd)"
+SDK_PATH="$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"/../ &>/dev/null && pwd)"
 source "$SDK_PATH/src/sh/lib.sh"
 sdk_lib_load log
 
