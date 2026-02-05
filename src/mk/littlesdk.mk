@@ -1,18 +1,5 @@
-# -----------------------------------------------------------------------------
-#
-# LITTLESDK CORE MODULE LOADER
-#
-# -----------------------------------------------------------------------------
-
-# Main entry point for LittleSDK module system. Loads configuration and rules
-# from registered modules, handling module dependencies and initialization order.
-
-# -----------------------------------------------------------------------------
-#
-# SHELL CONFIGURATION
-#
-# -----------------------------------------------------------------------------
-
+# --
+# We define the basic make configuration flags and shell.
 SHELL:=bash
 .SHELLFLAGS:=-euo pipefail -c
 MAKEFLAGS+=--warn-undefined-variables
@@ -20,54 +7,25 @@ MAKEFLAGS+=--no-builtin-rules
 .ONESHELL:
 .FORCE:
 
-# -----------------------------------------------------------------------------
-#
-# PATHS AND MODULES
-#
-# -----------------------------------------------------------------------------
-
 # --
-# ## SDK Paths
-
-# Internal path calculation (relative from SDK root)
+# We load the standard library, at which point we'll
+# be able to load the modules
 _SDK_PATH:=$(subst $(realpath .)/,,$(realpath $(dir $(lastword $(MAKEFILE_LIST)))../..))
-
-# Path to SDK root directory (defaults to current directory)
 SDK_PATH:=$(if $(_SDK_PATH),$(_SDK_PATH),./)
-
-# Path to module definitions (directory containing this file)
-MODULES_PATH:=src/mk/littlesdk
-
-# --
-# ## SDK Configuration
-
-# Active modules to load (defaults to all available)
+MODULES_PATH:=$(patsubst %.mk,%,$(lastword $(MAKEFILE_LIST)))
 MODULES?=$(MODULES_AVAILABLE)
-
-# Optional title displayed in SDK header
 SDK_TITLE?=
-
-# Formatted header string for display
 SDK_HLO?=🧰 $(BOLD)LittleSDK$(if $(SDK_TITLE), ― $(SDK_TITLE))$(RESET)
-
-# Logging level (all, quiet, or error)
 SDK_LOGGING?=all
-
-# Prefix for formatted log messages
+# The prefix used in logging output
 FMT_PREFIX?=[kit]
 
-# -----------------------------------------------------------------------------
-#
-# FUNCTIONS
-#
-# -----------------------------------------------------------------------------
+include $(MODULES_PATH)/std/lib.mk
 
-# --
-# ## Module Loading
+$(info ┉┅━┅┉ ━━━ $(SDK_HLO)$(RESET))
 
 def-include=$(EOL)$(if $(filter quiet,$(SDK_LOGGING)),,$(info $(call fmt_action,Load $(call fmt_module,$1))))$(EOL)include $1
-
-# NOTE: Module loading assumes modules are in MODULES_PATH; custom module paths require refactoring
+# FIXME: That won't work if we have modules found elsewhere than MODULES_PATH
 define def-module-load
 $(if $(wildcard src/mk/$(subst .mk,.pre.mk,$1)),$(call def-include,src/mk/$(subst .mk,.pre.mk,$1)))
 $(if $(filter config.mk,$1),$(if $(wildcard src/mk/$1),$(call def-include,src/mk/$1)))
@@ -77,28 +35,12 @@ $(if $(filter rules.mk,$1),$(if $(wildcard src/mk/$1),$(call def-include,src/mk/
 $(if $(wildcard src/mk/$(subst .mk,.post.mk,$1)),$(call def-include,src/mk/$(subst .mk,.post.mk,$1)))
 endef
 
-# -----------------------------------------------------------------------------
-#
-# INITIALIZATION
-#
-# -----------------------------------------------------------------------------
-
-# Load standard library for utility functions
-include $(MODULES_PATH)/std/lib.mk
-
-# Display SDK header on load
-$(info ┉┅━┅┉ ━━━ $(SDK_HLO)$(RESET))
-
-# Load configuration from all modules in order:
-# 1. Standard library config
-# 2. Module configs (in registration order)
+# We load the standard library first
 $(eval $(call def-include,$(MODULES_PATH)/std/config.mk))
 $(eval $(call def-module-load,config.mk))
-
-# Load rules from all modules in order:
-# 1. Standard library rules
-# 2. Module rules (in registration order)
+# Standard rules are loaded first
 $(eval $(call def-include,$(MODULES_PATH)/std/rules.mk))
 $(eval $(call def-module-load,rules.mk))
 
+#
 # EOF

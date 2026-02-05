@@ -1,4 +1,4 @@
-# NOTE: Future enhancement to support both Node.js and Bun as JavaScript runtimes (currently defaults to Bun)
+# TODO: Support switching between Node and Bun as the runtime
 
 JS_RUNTIME?=bun
 JS_DIST_PATH?=$(PATH_DIST)/lib/js
@@ -24,7 +24,7 @@ JS_BUNDLE_EXTERNAL?=
 JS_BUNDLE_ICONS_OUTPUT?=build/icons.json
 JS_BUNDLE_ICONS_SOURCES?=$(SOURCES_TS)
 
-# NOTE: Server output path is project-specific; consider making this configurable per project type
+# FIXME: Too specific, needs to be reworked
 JS_SERVER_ENTRY?=
 JS_SERVER_OUTPUT?=dist/bin/$(PROJECT)-server
 
@@ -33,7 +33,7 @@ JS_SERVER_OUTPUT?=dist/bin/$(PROJECT)-server
 # `latest`.
 BUN_VERSION?=latest
 
-# NOTE: Should use mise-managed Bun: `$(call mise_exec,bun)` instead of direct PATH lookup
+# TODO: Should be `mise x -- bun`
 BUN?=$(CMD) bun
 
 ## Default NodeJS version
@@ -50,7 +50,7 @@ USE_NODE?=
 
 JS_RUN=$(BUN) x
 
-# NOTE: Ensures Node.js modules in USE_NODE are prepared before build phase
+# TODO: We should make sure we do that with th
 PREP_ALL+=$(foreach M,$(USE_NODE),build/install-node-$M.task)
 
 BUILD_JS=\

@@ -1,90 +1,39 @@
-# -----------------------------------------------------------------------------
-#
-# STANDARD LIBRARY RULES
-#
-# -----------------------------------------------------------------------------
-
-# Standard build rules and targets for LittleSDK projects.
-# These provide the core build lifecycle: prep, build, check, test, dist, clean.
-
-# --
-# ## CLI Check Integration
-
-USE_CLI_CHECK+=|| which $1 2> /dev/null ## Extend CLI check command
-
-# -----------------------------------------------------------------------------
-#
-# DEFAULT RULE
-#
-# -----------------------------------------------------------------------------
+USE_CLI_CHECK+=|| which $1 2> /dev/null
 
 .PHONY: default
-default: $(DEFAULT_RULE) ## Default target (runs DEFAULT_RULE)
+default: $(DEFAULT_RULE)
 	@
-
-# -----------------------------------------------------------------------------
-#
-# PREPARATION
-#
-# -----------------------------------------------------------------------------
 
 .PHONY: prep
-prep: $(PREP_ALL) ## Prepares dependencies and environment
+prep: $(PREP_ALL) ## Alias to `prep`
 	@
 
-# -----------------------------------------------------------------------------
-#
-# CHECK AND FIX
-#
-# -----------------------------------------------------------------------------
-
-# --
-# ## Code Quality
-
 .PHONY: lint
-lint: check ## Alias for check
+lint: check ## Alias to `check`
 	@
 
 .PHONY: check
-check: $(PREP_ALL) $(CHECK_ALL) ## Runs all checks (linting, audits, formatting)
+check: $(PREP_ALL) $(CHECK_ALL) ## Runs all the checks
 	@$(call rule_post_cmd)
 
 .PHONY: fmt
-fmt: fix ## Alias for fix
+fmt: fix ## Alias to `fix`
 	@
 
 .PHONY: fix
-fix: $(PREP_ALL) $(FIX_ALL) ## Runs all fixes (auto-fix formatting issues)
+fix: $(PREP_ALL) $(FIX_ALL) ## Runs all the fixes
 	@$(call rule_post_cmd)
-
-# -----------------------------------------------------------------------------
-#
-# BUILD
-#
-# -----------------------------------------------------------------------------
 
 .PHONY: build
-build: $(PREP_ALL) $(BUILD_ALL) ## Builds all outputs defined in BUILD_ALL
+build: $(PREP_ALL) $(BUILD_ALL) ## Builds all outputs in BUILD_ALL
 	@$(call rule_post_cmd)
-
-# -----------------------------------------------------------------------------
-#
-# RUN
-#
-# -----------------------------------------------------------------------------
 
 .PHONY: run
 run: $(PREP_ALL) $(RUN_ALL) ## Runs the project
 	@$(call rule_post_cmd)
 
-# -----------------------------------------------------------------------------
-#
-# TEST
-#
-# -----------------------------------------------------------------------------
-
 .PHONY: test
-test: $(PREP_ALL) $(TEST_ALL) ## Runs all tests
+test: $(PREP_ALL) $(TEST_ALL) ## Runs tests
 	@$(call rule_pre_cmd)
 	failed_tests=0
 	for test in $(TESTS_SH); do
@@ -101,28 +50,16 @@ test: $(PREP_ALL) $(TEST_ALL) ## Runs all tests
 	@echo "$(call fmt_result,[TEST] All tests passed)"
 	@$(call rule_post_cmd)
 
-# -----------------------------------------------------------------------------
-#
-# DISTRIBUTION
-#
-# -----------------------------------------------------------------------------
-
-# --
-# ## Distribution Targets
-
 .PHONY: dist
-dist: $(PREP_ALL) $(DIST_ALL) ## Creates distribution packages
+dist: $(PREP_ALL) $(DIST_ALL)
 	@$(call rule_post_cmd)
 
-# --
-# Function: create_compressed_archive
-# Creates a compressed archive with consistent permissions and timestamps.
-# - ARCHIVE: Target archive file path
-# - FORMAT: Compression format (gz, bz2, xz)
-# - FLAG: Tar compression flag (z, j, J)
-# - LEVEL: Compression level (1-9)
-# Returns: Shell commands to create archive
-
+# Reusable function for creating compressed archives
+# Parameters:
+#   $1 = target archive file
+#   $2 = compression format (gz, bz2, xz)
+#   $3 = compression flag (z, j, J)
+#   $4 = compression level
 define create_compressed_archive
 	@$(call rule_pre_cmd)
 	# Find the most recent mtime
@@ -151,11 +88,11 @@ define create_compressed_archive
 	@$(call rule_post_cmd,$1)
 endef
 
-# Ensure distribution directory exists
+# Ensure PATH_DIST directory exists
 $(PATH_DIST):
 	@mkdir -p $@
 
-# Archive targets
+# Archive targets using the reusable function
 dist/$(PROJECT)-$(REVISION).tar.gz: $(DIST_ALL) $(MAKEFILE_LIST) | $(PATH_DIST)
 	$(call create_compressed_archive,$@,gz,z,$(COMPRESS_GZ_LEVEL))
 
@@ -166,15 +103,15 @@ dist/$(PROJECT)-$(REVISION).tar.xz: $(DIST_ALL) $(MAKEFILE_LIST) | $(PATH_DIST)
 	$(call create_compressed_archive,$@,xz,J,$(COMPRESS_XZ_LEVEL))
 
 .PHONY: dist-package
-dist-package: $(DIST_PACKAGES) ## Creates all distribution packages
+dist-package: $(DIST_PACKAGES)
 
 .PHONY: dist-package-gz dist-package-bz2 dist-package-xz
-dist-package-gz: dist/$(PROJECT)-$(REVISION).tar.gz ## Creates gzip-compressed distribution
-dist-package-bz2: dist/$(PROJECT)-$(REVISION).tar.bz2 ## Creates bzip2-compressed distribution
-dist-package-xz: dist/$(PROJECT)-$(REVISION).tar.xz ## Creates xz-compressed distribution
+dist-package-gz: dist/$(PROJECT)-$(REVISION).tar.gz
+dist-package-bz2: dist/$(PROJECT)-$(REVISION).tar.bz2
+dist-package-xz: dist/$(PROJECT)-$(REVISION).tar.xz
 
 .PHONY: dist-info
-dist-info: ## Shows distribution files with sizes and totals
+dist-info: ## Shows distribution files with sizes and total
 	@$(call rule_pre_cmd)
 	total_size=0
 	file_count=0
@@ -213,14 +150,8 @@ dist-info: ## Shows distribution files with sizes and totals
 		echo "$(call fmt_tip,[STD] $$missing_count files missing. Run $(BOLD)make dist$(RESET) to create them)"
 	fi
 
-# -----------------------------------------------------------------------------
-#
-# HELP
-#
-# -----------------------------------------------------------------------------
-
 .PHONY: help
-help: ## Shows this help message
+help: ## This command
 	@$(call rule_pre_cmd)
 	cat << EOF
 	…
@@ -262,7 +193,6 @@ help: ## Shows this help message
 		printf '%s\n' "$${dev_rules[@]}" | sort
 	fi
 
-.PHONY: help-vars
 help-vars: ## Shows available configuration variables
 	@
 	vars=()
@@ -275,14 +205,8 @@ help-vars: ## Shows available configuration variables
 	printf '%s\n' "$${vars[@]}" | sort
 	echo "$(call fmt_tip,Run the following to see the value of the variable: $(BOLD)make print-VARNAME$(DIM))"
 
-# -----------------------------------------------------------------------------
-#
-# CLEANUP
-#
-# -----------------------------------------------------------------------------
-
 .PHONY: clean
-clean: ## Removes build, run, and dist directories
+clean: ## Cleans the project, removing build and run files
 	@$(call rule_pre_cmd)
 	for dir in build run dist $(CLEAN_ALL); do
 		if [ -d "$$dir" ]; then
@@ -295,46 +219,30 @@ clean: ## Removes build, run, and dist directories
 		fi
 	done
 
-# -----------------------------------------------------------------------------
-#
-# DEVELOPMENT
-#
-# -----------------------------------------------------------------------------
-
-# --
-# ## Development Helpers
 
 .PHONY: shell
-shell: ## Opens a shell with SDK environment configured
+shell: ## Opens a shell setup with the environment
 	@env -i TERM=$(TERM) "PATH=$(ENV_PATH)" "PYTHONPATH=$(ENV_PYTHONPATH)" bash --noprofile --rcfile "$(SDK_PATH)/src/sh/std.prompt.sh"
 
 .PHONY: live-%
-live-%: ## Auto-rebuilds target when source files change
+live-%:
 	@$(call rule_pre_cmd)
 	echo $(SOURCES_ALL) | xargs -n1 echo | entr -c -r bash -c 'sleep 0.25 && make $* $(MAKEFLAGS)'
 
 .PHONY: print-%
-print-%: ## Shows the value of any variable
+print-%:
 	@$(info $(BOLD)$*=$(RESET)$(EOL)$(strip $($*))$(EOL)$(BOLD)END$(RESET))
 
 .PHONY: list-%
-list-%: ## Shows the value of any variable as a list
+list-%:
 	@$(info $(BOLD)$*=$(RESET)$(EOL)$(foreach V,$(strip $($*)),$V$(EOL))$(EOL)$(BOLD)END$(RESET))
 
 .PHONY: def-%
-def-%: ## Shows the definition of any variable or function
+def-%:
 	@$(info $(BOLD)$*=$(RESET)$(EOL)$(value $*)$(EOL)$(BOLD)END$(RESET))
 
-# -----------------------------------------------------------------------------
-#
-# CLI TOOLS
-#
-# -----------------------------------------------------------------------------
-
 # --
-# ## CLI Tool Verification
-
-# Ensures the given CLI tool is installed and creates a marker file
+# Ensures thah the given CLI tool is installed
 $(PATH_BUILD)/cli-%.task:
 	CLI_PATH="$$(test -e "run/bin/$*" && echo "run/bin/$*" $(call USE_CLI_CHECK,$*) || true)"
 	if [ -z "$$CLI_PATH" ]; then
@@ -348,22 +256,8 @@ $(PATH_BUILD)/cli-%.task:
 		echo "$(call fmt_result,[STD] OK: $$CLI_PATH)"
 	fi
 
-# -----------------------------------------------------------------------------
-#
-# SDK FILE LINKING
-#
-# -----------------------------------------------------------------------------
 
-# --
-# ## Dotfile Linking
-
-# --
-# Function: prep-link
-# Creates a rule to link a dotfile or config file.
-# - DST: Destination path (in project root)
-# - SRC: Source path (in SDK etc/ directory)
-# Returns: Makefile rule definition
-
+# Links dotfiles, prefixed with a dot
 define prep-link
 $(EOL)
 $(1): $(2)
@@ -387,9 +281,9 @@ $(1): $(2)
 $(EOL)
 endef
 
-# Link dotfiles (prefixed with _ in SDK become . in project)
+# --
+# Links configuration files
 $(eval $(call prep-link,.%,$(SDK_PATH)/etc/_%))
 $(eval $(call prep-link,%,$(SDK_PATH)/etc/%))
 $(eval $(foreach F,$(strip $(PREP_SDK)),$(call prep-link,$F,$(SDK_PATH)/etc/$(patsubst .%,_%,$F))))
-
 # EOF

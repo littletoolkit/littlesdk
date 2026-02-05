@@ -1,36 +1,10 @@
-# -----------------------------------------------------------------------------
-#
-# CLOUDFLARE MODULE CONFIGURATION
-#
-# -----------------------------------------------------------------------------
+## Port on which the Wrangler will run
+CLOUDFLARE_WRANGLER_PORT?=8000
 
-# Configuration for Cloudflare deployment and wrangler integration.
+## Path to where the Cloudflare Pages to be uploaded are
+CLOUDFLARE_PAGES_PATH?=dist/www
+CLOUDFLARE_PAGES_ALL?=$(if $(DIST_WWW_ALL),$(DIST_WWW_ALL),$(call file_find,$(CLOUDFLARE_PAGES_PATH),*.*))
 
-# -----------------------------------------------------------------------------
-#
-# WRANGLER SETTINGS
-#
-# -----------------------------------------------------------------------------
-
-# --
-# ## Server Configuration
-
-# Port for wrangler dev server
-CLOUDFLARE_WRANGLER_PORT?=8000 ## Wrangler dev server port
-
-# --
-# ## Pages Deployment
-
-# Path to Cloudflare Pages assets for deployment
-CLOUDFLARE_PAGES_PATH?=dist/www ## Pages content directory
-
-# All files to deploy to Cloudflare Pages
-CLOUDFLARE_PAGES_ALL?=$(if $(DIST_WWW_ALL),$(DIST_WWW_ALL),$(call file_find,$(CLOUDFLARE_PAGES_PATH),*.*)) ## Pages files to deploy
-
-# --
-# ## Tools
-
-# Path to wrangler CLI
-CLOUDFLARE_WRANGLER?=$(NODE) node_modules/wrangler/bin/wrangler.js ## Wrangler executable path
-
+## Path to `wrangler`
+CLOUDFLARE_WRANGLER?=$(NODE) node_modules/wrangler/bin/wrangler.js
 # EOF
