@@ -8,10 +8,12 @@
 ```
 
 
-*LittleSDK* is a lightweight and modular SDK for building and managing projects efficiently.
-## Overview
+*LittleSDK* is a lightweight and modular SDK that can be used as the baseline
+to build, run, test, package, deploy and release projects across multiple
+languages.
 
-LittleSDK provides a structured approach to project management, offering a set of tools and conventions to streamline development workflows. It includes Makefile modules for various tasks, shell scripts for environment setup, and a clear project structure to ensure consistency and maintainability.
+LittleSDK primarily relies on Make and Bash run, and is designed to be easily
+extensible thanks to its modular and documented approach.
 
 ## Features
 
