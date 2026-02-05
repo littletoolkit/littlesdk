@@ -1,2 +1,20 @@
+# -----------------------------------------------------------------------------
+#
+# HELLO PYTHON EXAMPLE
+#
+# -----------------------------------------------------------------------------
+
+# Example project demonstrating Python setup with LittleSDK.
+# Overrides default Python version to use 3.10.
+
+# --
+# ## SDK Integration
+
 include ../../setup.mk
-PYTHON_VERSION=3.10
+
+# --
+# ## Python Configuration
+
+PYTHON_VERSION=3.10 ## Python version for this project
+
+# EOF

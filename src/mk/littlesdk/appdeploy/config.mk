@@ -1,21 +1,39 @@
 # -----------------------------------------------------------------------------
-# CONFIG
+#
+# APPDEPLOY MODULE CONFIGURATION
+#
+# -----------------------------------------------------------------------------
+
+# Configuration for deploying shell scripts and application components.
+
+# -----------------------------------------------------------------------------
+#
+# DEPLOYMENT SCRIPTS
+#
 # -----------------------------------------------------------------------------
 
 # --
-# List of shell scripts to be deployed
-# These scripts are copied to the distribution directory during the build process.
-APPDEPLOY_SCRIPTS=env run check
+# ## Script Configuration
+
+# List of shell script names to deploy (without .sh extension)
+APPDEPLOY_SCRIPTS=env run check ## Scripts to deploy
+
+# Source files for the shell scripts
+APPDEPLOY_SOURCES=$(wildcard $(foreach S,$(APPDEPLOY_SCRIPTS),src/sh/$S.sh)) ## Script source files
+
+# -----------------------------------------------------------------------------
+#
+# DISTRIBUTION
+#
+# -----------------------------------------------------------------------------
 
 # --
-# Sources for the shell scripts
-# This variable finds all the shell scripts defined in APPDEPLOY_SCRIPTS.
-APPDEPLOY_SOURCES=$(wildcard $(foreach S,$(APPDEPLOY_SCRIPTS),src/sh/$S.sh))
+# ## Distribution Targets
 
-# --
-# Distribution targets for the shell scripts
-# These targets are added to the DIST_ALL variable to ensure they are built.
-DIST_APPDEPLOY+=$(patsubst src/sh/%,$(PATH_DIST)/%,$(APPDEPLOY_SOURCES))
+# Distribution files for appdeploy scripts
+DIST_APPDEPLOY+=$(patsubst src/sh/%,$(PATH_DIST)/%,$(APPDEPLOY_SOURCES)) ## Script distribution files
+
+# Add to distribution phase
 DIST_ALL+=$(DIST_APPDEPLOY)
 
 # EOF

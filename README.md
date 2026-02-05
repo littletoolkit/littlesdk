@@ -15,10 +15,12 @@ LittleSDK provides a structured approach to project management, offering a set o
 
 ## Features
 
-- **Modular Makefile System**: Organized into reusable modules for different tasks (e.g., `std`, `prep`, `py`, `js`).
+- **Modular Makefile System**: Organized into reusable modules for different tasks (e.g., `std`, `py`, `js`, `www`).
 - **Shell Utilities**: Scripts for environment setup, prompt customization, and dependency management.
 - **Consistent Project Structure**: Clear conventions for organizing source files, build outputs, and distributions.
 - **Extensible**: Easy to add new modules or customize existing ones.
+- **Multi-Language Support**: Built-in support for Python, JavaScript/TypeScript, and web assets.
+- **Cloud Integrations**: Ready-to-use integrations for GitHub, Cloudflare, and secrets management.
 
 ## Getting Started
 
@@ -59,11 +61,17 @@ make help
 ```
 src/
 ├── mk/                  # Makefile modules
-│   ├── littlesdk.mk      # Core configuration
-│   ├── std/              # Standard rules and configurations
-│   ├── prep/             # Preparation rules
-│   ├── py/               # Python-specific rules
-│   ├── js/               # JavaScript-specific rules
+│   ├── littlesdk.mk      # Core module loader
+│   ├── littlesdk/        # Module definitions
+│   │   ├── std/          # Standard library (core functions)
+│   │   ├── py/           # Python support
+│   │   ├── js/           # JavaScript/TypeScript support
+│   │   ├── www/          # Web assets (HTML/CSS)
+│   │   ├── secrets/      # Secrets management
+│   │   ├── mise/         # Mise tool manager
+│   │   ├── github/       # GitHub integration
+│   │   ├── cloudflare/   # Cloudflare integration
+│   │   └── appdeploy/    # Application deployment
 │   └── ...
 └── sh/                  # Shell scripts
     ├── install.sh        # Dependency installation
@@ -74,27 +82,81 @@ src/
 
 ## Modules
 
-Core:
-- `std`, core functions and lifecycle
+### Core
+- **`std`** — Standard library providing core functions, build lifecycle, and utilities
+  - Build phases: `prep`, `build`, `check`, `test`, `dist`, `clean`
+  - Utility functions: file operations, formatting, shell helpers
+  - Terminal colors and output formatting
 
- Languages:
-- `py`, python support
-- `js`, JavaScript (Node, Bun) support
-- `www`, HTML/CSS static files
+### Languages
+- **`py`** — Python project support
+  - Linting with ruff, type checking, security auditing with bandit
+  - Testing with pytest
+  - Package management with pip/uv
+  
+- **`js`** — JavaScript/TypeScript support (Bun/Node)
+  - Linting with Biome, type checking with TypeScript
+  - Testing with Bun test runner
+  - Bundle creation for production
+  - Standalone server compilation
+  
+- **`www`** — Web asset processing
+  - HTML validation and tidying
+  - CSS-in-JS compilation
+  - XML/XSLT transformations
+  - Static file distribution
 
-Integrations:
-- `secrets`, LittleSecrets integration
-- `github`, GitHub Integration
-- `cloudflare`, CloudFlare integration
-- `appdeploy`, AppDeploy integration
-- `mise`, Mise-En-Place integration
+### Integrations
+- **`secrets`** — Secrets management via LittleSecrets
+  - Export secrets as environment variables
+  - Integration with secret stores
+  
+- **`github`** — GitHub dependency management
+  - Clone and install dependencies from GitHub repositories
+  - Automatic linking of binaries and Python packages
+  
+- **`cloudflare`** — Cloudflare deployment
+  - Wrangler CLI integration
+  - Cloudflare Pages deployment
+  - Local development server
+  
+- **`mise`** — Mise-En-Place (formerly rtx) integration
+  - Tool version management
+  - Automatic tool installation
+  
+- **`appdeploy`** — Application deployment utilities
+  - Shell script deployment
+  - Environment setup scripts
+
+## Build Lifecycle
+
+LittleSDK uses a phased build system:
+
+1. **`prep`** — Prepare dependencies and environment
+2. **`build`** — Compile and build all outputs
+3. **`check`** — Run linters, audits, and checks
+4. **`fix`** — Auto-fix formatting and linting issues
+5. **`test`** — Run all tests
+6. **`run`** — Run the project locally
+7. **`dist`** — Create distribution packages
+8. **`clean`** — Remove build artifacts
 
 ## Configuration
 
+### Path Variables
 - `PATH_SRC`: Directory for source files (default: `src`).
 - `PATH_RUN`: Directory for runtime files (default: `run`).
 - `PATH_DEPS`: Directory for dependencies (default: `deps`).
 - `PATH_BUILD`: Directory for build artifacts (default: `build`).
 - `PATH_DIST`: Directory for distribution files (default: `dist/package`).
+
+### Phase Variables
+- `PREP_ALL`: Dependencies to prepare before building
+- `BUILD_ALL`: Files to build
+- `CHECK_ALL`: Checks to run
+- `FIX_ALL`: Auto-fixes to apply
+- `TEST_ALL`: Test targets
+- `RUN_ALL`: Runtime dependencies
+- `DIST_ALL`: Distribution files
 
 

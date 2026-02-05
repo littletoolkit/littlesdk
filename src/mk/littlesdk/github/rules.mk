@@ -1,8 +1,22 @@
-$(PATH_RUN)/install-github-%.task: ## Installs the given Github repo in the form USER/REPO@VERSION
+# -----------------------------------------------------------------------------
+#
+# GITHUB MODULE RULES
+#
+# -----------------------------------------------------------------------------
+
+# Rules for cloning and installing GitHub repository dependencies.
+
+# -----------------------------------------------------------------------------
+#
+# REPOSITORY INSTALLATION
+#
+# -----------------------------------------------------------------------------
+
+$(PATH_RUN)/install-github-%.task: ## Installs GitHub repo (format: USER/REPO@VERSION)
 	@$(call rule_pre_cmd)
 	USERNAME="$(firstword $(subst /,$(SPACE),$*))"
 	REPONAME="$(firstword $(subst @,$(SPACE),$(lastword $(subst /,$(SPACE),$*))))"
-	REVISION="$(lastword  $(subst @,$(SPACE),$(lastword $(subst /,$(SPACE),$*))))"
+	REVISION="$(lastword $(subst @,$(SPACE),$(lastword $(subst /,$(SPACE),$*))))"
 	mkdir -p "$(PATH_DEPS)"
 	if [ ! -e "$(PATH_DEPS)/$$REPONAME" ]; then
 		if ! $(GIT) clone "git@github.com:$$USERNAME/$$REPONAME.git" "$(PATH_DEPS)/$$REPONAME"; then
