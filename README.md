@@ -38,7 +38,7 @@ LittleSDK provides a structured approach to project management, offering a set o
 mkdir -p deps/sdk
 git clone git@github.com:littletoolkit/littlesdk.git deps/sdk
 # Copy the template
-cp deps/sdk/Makefile.template .
+cp deps/sdk/Makefile.template Makefile
 # Get started
 make help
 ```
@@ -93,13 +93,13 @@ src/
   - Linting with ruff, type checking, security auditing with bandit
   - Testing with pytest
   - Package management with pip/uv
-  
+
 - **`js`** — JavaScript/TypeScript support (Bun/Node)
   - Linting with Biome, type checking with TypeScript
   - Testing with Bun test runner
   - Bundle creation for production
   - Standalone server compilation
-  
+
 - **`www`** — Web asset processing
   - HTML validation and tidying
   - CSS-in-JS compilation
@@ -110,20 +110,20 @@ src/
 - **`secrets`** — Secrets management via LittleSecrets
   - Export secrets as environment variables
   - Integration with secret stores
-  
+
 - **`github`** — GitHub dependency management
   - Clone and install dependencies from GitHub repositories
   - Automatic linking of binaries and Python packages
-  
+
 - **`cloudflare`** — Cloudflare deployment
   - Wrangler CLI integration
   - Cloudflare Pages deployment
   - Local development server
-  
+
 - **`mise`** — Mise-En-Place (formerly rtx) integration
   - Tool version management
   - Automatic tool installation
-  
+
 - **`appdeploy`** — Application deployment utilities
   - Shell script deployment
   - Environment setup scripts
