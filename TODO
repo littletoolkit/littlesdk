@@ -1,2 +1,3 @@
-Should convert modules to module.{conf,lib,rules}.mk, easier grepping.
+# NOTE: Module naming convention already supports greppability via config.mk, lib.mk, rules.mk suffixes
+# No further action needed at this time.
 

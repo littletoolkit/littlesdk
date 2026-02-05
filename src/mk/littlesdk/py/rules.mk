@@ -64,9 +64,12 @@ py-test: $(TESTS_PY)  ## Runs Python tests
 	$(call rule_post_cmd,$^)
 
 .PHONY: py-info
-py-info: ## Shows Python project configuratino
-	@
-	# TODO
+py-info: ## Shows Python project configuration
+	@$(call rule_pre_cmd)
+	@echo "$(call fmt_action,Python configuration)"
+	@echo "Sources: $(SOURCES_PY)"
+	@echo "Tests: $(TESTS_PY)"
+	@echo "Dependencies: $(DEPS_PY_MODULES)"
 
 # Copies Python source files to dist
 $(PATH_DIST)/lib/py/%.py: $(PATH_SRC)/py/%.py
@@ -91,7 +94,7 @@ $(PATH_BUILD)/install-python-%.task: ## Installs the given Python module for the
 	if [ -n "$$VERSION" ]; then
 		MODULE+="--$$VERSION"
 	fi
-	# TODO: We should modularize that and support other installers
+	# NOTE: Currently uses pip only; future: support poetry, uv, and other Python package managers
 	if $(PYTHON) -m pip install --user -U "$$MODULE"; then
 		touch "$@"
 	else

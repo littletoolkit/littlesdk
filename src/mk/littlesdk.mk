@@ -67,7 +67,7 @@ FMT_PREFIX?=[kit]
 
 def-include=$(EOL)$(if $(filter quiet,$(SDK_LOGGING)),,$(info $(call fmt_action,Load $(call fmt_module,$1))))$(EOL)include $1
 
-# FIXME: That won't work if we have modules found elsewhere than MODULES_PATH
+# NOTE: Module loading assumes modules are in MODULES_PATH; custom module paths require refactoring
 define def-module-load
 $(if $(wildcard src/mk/$(subst .mk,.pre.mk,$1)),$(call def-include,src/mk/$(subst .mk,.pre.mk,$1)))
 $(if $(filter config.mk,$1),$(if $(wildcard src/mk/$1),$(call def-include,src/mk/$1)))

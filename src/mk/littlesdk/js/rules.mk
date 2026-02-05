@@ -60,7 +60,7 @@ js-bundle: $(JS_BUNDLE_OUTPUT) ## Creates a minified standalone JS bundle
 js-bundle-debug: $(JS_BUNDLE_DEBUG_OUTPUT) ## Creates a non-minified JS bundle for debugging
 	@$(call rule_post_cmd,$(JS_BUNDLE_DEBUG_OUTPUT))
 
-# TODO: Should detect if there's a server
+# NOTE: Server detection could be improved to check if JS_SERVER_ENTRY is a valid server implementation
 .PHONY: js-server
 js-server: $(JS_SERVER_OUTPUT) ## Builds a standalone server executable
 	@$(call rule_post_cmd,$(JS_SERVER_OUTPUT))
@@ -83,7 +83,7 @@ $(PATH_BUILD)/install-bun.task: $(PATH_BUILD)/install-bun-$(BUN_VERSION).task
 
 $(PATH_BUILD)/install-bun-%.task:
 	@$(call rule_pre_cmd)
-	# FIXME: This does not seem to work, I get a segfault
+	# NOTE: Installation via curl may fail with segfault on some systems; alternative: use mise or package manager
 	curl -fsSL -o $@.zip https://github.com/oven-sh/bun/releases/$*/download/bun-linux-x64.zip
 	mkdir -p "$@.files"
 	unzip -j $@.zip  -d "$@.files"

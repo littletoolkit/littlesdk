@@ -1,1 +1,66 @@
-deps
+# Dependencies
+deps/
+node_modules/
+.pip/
+__pycache__/
+*.pyc
+
+# Build artifacts
+build/
+run/
+dist/
+*.out
+*.log
+*.cache
+*.tmp
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.bak
+
+# Environment files
+.env
+.env.local
+*.secret
+
+# Python
+*.py[cod]
+*$py.class
+.Python
+env/
+venv/
+ENV/
+
+# JavaScript/TypeScript
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test coverage
+.coverage
+htmlcov/
+
+# IDE
+.project
+.pydevproject
+.classpath
+.settings/
+*.sublime-*
+
+# Misc
+*.orig
+*.rej
