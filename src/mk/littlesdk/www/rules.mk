@@ -190,7 +190,7 @@ $(PATH_DIST)/www/static/%: $(PATH_SRC)/static/%
 $(WWW_BUNDLE_LITTLECSS): $(wildcard $(PATH_DEPS)/littlecss/src/css/*.js)
 	@$(call rule_pre_cmd)
 	@mkdir -p $(dir $@)
-	$(call shell_create_if,$(PATH_DEPS)/littlecss/bin/littlecss $(PATH_DEPS)/littlecss/src/css/all.js > $@,Unable to compile LittleCSS)
+	$(call shell_create_if,$(PATH_DEPS)/littlecss/bin/littlecss > $@,Unable to compile LittleCSS)
 
 # --
 # Copy project CSS to dist/www

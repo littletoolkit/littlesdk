@@ -64,6 +64,7 @@ SOURCES_ALL?=## All the source files known by the kit
 PACKAGE_ALL?=## All the files that will be packaged in distributions
 DIST_ALL?=## All the distribution files
 DIST_PACKAGES=$(addprefix dist/$(PROJECT)-$(REVISION).tar., $(DIST_FORMATS))
+DIST_PACKAGE=$(firstword $(DIST_PACKAGES))
 
 # Compression formats and levels for distribution archives
 DIST_FORMATS?=bz2 ## Supports: bz2, gz, xz

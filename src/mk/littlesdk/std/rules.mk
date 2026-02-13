@@ -210,6 +210,7 @@ clean: ## Cleans the project, removing build and run files
 	@$(call rule_pre_cmd)
 	for dir in build run dist $(CLEAN_ALL); do
 		if [ -d "$$dir" ]; then
+			[ "$$dir" = "dist" ] && chmod -R u+w "$$dir" 2>/dev/null || true
 			count=$$(find $$dir -name '*' | wc -l)
 			echo "$(call fmt_action,[STD] Cleaning up directory: $(call fmt_path,$$dir)) [$$count]"
 			rm -rf "$$dir"
