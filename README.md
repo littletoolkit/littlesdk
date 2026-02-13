@@ -26,6 +26,19 @@ extensible thanks to its modular and documented approach.
 
 ## Getting Started
 
+### Quickstart
+
+Crate the following `Makefile`
+
+```
+#  LittleSDK Bootstrapping
+SDK_PATH=deps/sdk
+include $(if $(SDK_PATH),$(shell test ! -e "$(SDK_PATH)/setup.mk" && git clone git@github.com:littletoolkit/littlesdk.git "$(SDK_PATH)";echo "$(SDK_PATH)/setup.mk"))
+# EOF -- vim: ft=make
+```
+
+and type `make prep`
+
 ### Prerequisites
 
 - `gmake` (GNU make, 4.4+)
