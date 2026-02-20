@@ -5,12 +5,38 @@
 	"mcp": {
 		// Lattice MCP helps reduce token consumption.
 		// SEE: https://yogthos.net/posts/2026-01-16-lattice-mcp.html
-		// You can validate this with: opencode mcp list | grep lattice-mcp
+		// Use the installed binary instead of `bun x` to avoid cache and ABI drift.
+		// You can validate this with: opencode mcp list | grep lattice
 		"lattice": {
 			"type": "local",
-			"command": ["bun", "x", "-y", "lattice-mcp"],
-			"enabled": true,
+			"command": ["lattice-mcp"],
+			"enabled": true
 		},
-	},
+		"playwright": {
+			"type": "local",
+			"command": ["bun", "x", "-y", "@playwright/mcp@latest"],
+			"enabled": true
+		},
+		//"context7": {
+		//	"type": "remote",
+		//	"url": "https://mcp.context7.com/mcp",
+		//	"headers": {
+		//		"CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}"
+		//	},
+		//	"enabled": true
+		//},
+		"context7": {
+			"type": "local",
+			"command": [
+				"bun",
+				"x",
+				"-y",
+				"@upstash/context7-mcp",
+				"--api-key",
+				"{env:CONTEXT7_API_KEY}"
+			],
+			"enabled": true
+		}
+	}
 }
 // EOF
