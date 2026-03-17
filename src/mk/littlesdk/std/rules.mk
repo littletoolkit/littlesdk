@@ -245,7 +245,8 @@ def-%:
 # --
 # Ensures thah the given CLI tool is installed
 $(PATH_BUILD)/cli-%.task:
-	CLI_PATH="$$(test -e "run/bin/$*" && echo "run/bin/$*" $(call USE_CLI_CHECK,$*) || true)"
+	@$(call rule_pre_cmd)
+	CLI_PATH="$$(test -e "run/bin/$*" && printf '%s\n' "run/bin/$*" $(call USE_CLI_CHECK,$*) || true)"
 	if [ -z "$$CLI_PATH" ]; then
 		echo "$(call fmt_error,[STD] Could not find CLI tool: $*)"
 		test -e "$@" && unlink "$@"
@@ -256,6 +257,7 @@ $(PATH_BUILD)/cli-%.task:
 		touch --date=@0 "$@"
 		echo "$(call fmt_result,[STD] OK: $$CLI_PATH)"
 	fi
+	$(call rule_post_cmd)
 
 
 # Links dotfiles, prefixed with a dot

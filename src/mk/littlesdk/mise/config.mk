@@ -7,7 +7,7 @@ MISE_QUIET?=0
 # Version for `mise`
 MISE_VERSION?=v2026.1.5
 
-MISE_BIN=$(PATH_BIN)/bin/mise-$(MISE_VERSION)
+MISE_BIN=$(PATH_RUN)/bin/mise-$(MISE_VERSION)
 
-USE_CLI_CHECK+=|| which $(MISE_BIN) && $(MISE_VERSION) -x which $1 2> /dev/null
+USE_CLI_CHECK+=|| (test -x "$(MISE_BIN)" && "$(MISE_BIN)" -x command -v $1 2> /dev/null)
 #
