@@ -24,7 +24,7 @@ include $(MODULES_PATH)/std/lib.mk
 
 $(info ┉┅━┅┉ ━━━ $(SDK_HLO)$(RESET))
 
-def-include=$(EOL)$(if $(filter quiet,$(SDK_LOGGING)),,$(info $(call fmt_action,Load $(call fmt_module,$1))))$(EOL)include $1
+def-include=$(EOL)$(if $(value DEBUG),$(info $(call fmt_action,$(call fmt_module,$1))))$(EOL)include $1
 # FIXME: That won't work if we have modules found elsewhere than MODULES_PATH
 define def-module-load
 $(if $(wildcard src/mk/$(subst .mk,.pre.mk,$1)),$(call def-include,src/mk/$(subst .mk,.pre.mk,$1)))

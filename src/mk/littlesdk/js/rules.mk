@@ -5,18 +5,18 @@
 define js-linter
 	$(call use_env)
 	if [ -n "$(if $(strip $(SOURCES_JS)),JS)" ]; then
-		echo "$(call fmt_action,Linting: $(SOURCES_JS))"
+		echo "$(call fmt_action,Linting: $(words $(SOURCES_JS)) JS file(s))"
 		$(call shell_try,$(JS_RUN) @biomejs/biome lint --config-path=$(abspath $(SDK_PATH)/etc/biome.jsonc) $1 $(SOURCES_JS),Unable to lint JavaScript sources)
 	fi
 	if [ -n "$(if $(strip $(SOURCES_TS)),TS)" ]; then
-		echo "$(call fmt_action,Checking: $(SOURCES_TS))"
+		echo "$(call fmt_action,Checking: $(words $(SOURCES_TS)) TS file(s))"
 		$(call shell_try,$(JS_RUN) @biomejs/biome check --config-path=$(abspath $(SDK_PATH)/etc/biome.jsonc) $1 $(SOURCES_TS),Unable to lint TypeScript sources)
 	fi
 endef
 
 define ts-linter
 	if [ -n "$(wildcard tsconfig.json)" ]; then
-		echo "$(call fmt_action,Type checking: $(SOURCES_TS))"
+		echo "$(call fmt_action,Type checking: $(words $(SOURCES_TS)) TS file(s))"
 		$(call shell_try,$(JS_RUN) tsc --noEmit,Unable to lint TypeScript sources)
 	fi
 endef

@@ -5,7 +5,7 @@
 define py-linter
 	$(call use_env)
 	if [ -n "$(if $(strip $(SOURCES_PY)),PY)" ]; then
-		echo "$(call fmt_action,Linting: $(SOURCES_PY))"
+		echo "$(call fmt_action,Linting: $(words $(SOURCES_PY)) file(s))"
 		$(call shell_try,$(UV) run ruff check $(SOURCES_PY) $1,Unable to lint Python sources)
 	fi
 endef
@@ -13,7 +13,7 @@ endef
 define py-typechecker
 	$(call use_env)
 	if [ -n "$(if $(strip $(SOURCES_PY)),PY)" ]; then
-		echo "$(call fmt_action,Linting: $(SOURCES_PY))"
+		echo "$(call fmt_action,Type checking: $(words $(SOURCES_PY)) file(s))"
 		$(call shell_try,$(UV) run ty check $(SOURCES_PY) $1,Unable to typecheck Python sources)
 	fi
 endef
@@ -21,7 +21,7 @@ endef
 define py-auditor
 	$(call use_env)
 	if [ -n "$(if $(strip $(SOURCES_PY)),PY)" ]; then
-		echo "$(call fmt_action,Auditing: $(SOURCES_PY))"
+		echo "$(call fmt_action,Auditing: $(words $(SOURCES_PY)) file(s))"
 		$(call shell_try,$(UV) run bandit -r $(SOURCES_PY) $(BANDIT_OPTS) $1,Unable to audit Python sources)
 	fi
 endef
@@ -29,7 +29,7 @@ endef
 define py-fixer
 	$(call use_env)
 	if [ -n "$(if $(strip $(SOURCES_PY)),PY)" ]; then
-		echo "$(call fmt_action,Fixing: $(SOURCES_PY))"
+		echo "$(call fmt_action,Fixing: $(words $(SOURCES_PY)) file(s))"
 		$(call shell_try,$(UV) fmt $(SOURCES_PY),Unable to fix Python sources)
 	fi
 endef
