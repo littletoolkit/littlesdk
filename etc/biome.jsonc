@@ -3,7 +3,12 @@
 		"rules": {
 			"suspicious": {
 				"noExplicitAny": "off",
+				"noAssignInExpressions": "off"
 			},
-		},
-	},
+			"complexity": {
+				"noStaticOnlyClass": "off",
+				"noCommaOperator": "off"
+			}
+		}
+	}
 }
