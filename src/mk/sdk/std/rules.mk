@@ -53,6 +53,7 @@ test: $(PREP_ALL) $(TEST_ALL) ## Runs tests
 .PHONY: dist
 dist: $(PREP_ALL) $(DIST_ALL)
 	@$(call rule_post_cmd)
+	mkdi -p "$(PATH_DIST)"
 
 # Reusable function for creating compressed archives
 # Parameters:
@@ -88,27 +89,23 @@ define create_compressed_archive
 	@$(call rule_post_cmd,$1)
 endef
 
-# Ensure PATH_DIST directory exists
-$(PATH_DIST):
-	@mkdir -p $@
-
 # Archive targets using the reusable function
-dist/$(PROJECT)-$(REVISION).tar.gz: $(DIST_ALL) $(MAKEFILE_LIST) | $(PATH_DIST)
+$(PATH_DIST_ARCHIVE)/$(PROJECT)-$(REVISION).tar.gz: $(DIST_ALL) $(MAKEFILE_LIST) | $(PATH_DIST)
 	$(call create_compressed_archive,$@,gz,z,$(COMPRESS_GZ_LEVEL))
 
-dist/$(PROJECT)-$(REVISION).tar.bz2: $(DIST_ALL) $(MAKEFILE_LIST) | $(PATH_DIST)
+$(PATH_DIST_ARCHIVE)/$(PROJECT)-$(REVISION).tar.bz2: $(DIST_ALL) $(MAKEFILE_LIST) | $(PATH_DIST)
 	$(call create_compressed_archive,$@,bz2,j,$(COMPRESS_BZ2_LEVEL))
 
-dist/$(PROJECT)-$(REVISION).tar.xz: $(DIST_ALL) $(MAKEFILE_LIST) | $(PATH_DIST)
+$(PATH_DIST_ARCHIVE)/$(PROJECT)-$(REVISION).tar.xz: $(DIST_ALL) $(MAKEFILE_LIST) | $(PATH_DIST)
 	$(call create_compressed_archive,$@,xz,J,$(COMPRESS_XZ_LEVEL))
 
-.PHONY: dist-package
-dist-package: $(DIST_PACKAGES)
+.PHONY: dist-archive
+dist-archive: $(DIST_PACKAGES)
 
-.PHONY: dist-package-gz dist-package-bz2 dist-package-xz
-dist-package-gz: dist/$(PROJECT)-$(REVISION).tar.gz
-dist-package-bz2: dist/$(PROJECT)-$(REVISION).tar.bz2
-dist-package-xz: dist/$(PROJECT)-$(REVISION).tar.xz
+.PHONY: dist-archive-gz dist-archive-bz2 dist-archive-xz
+dist-archive-gz: $(PATH_DIST_ARCHIVE)/$(PROJECT)-$(REVISION).tar.gz
+dist-archive-bz2: $(PATH_DIST_ARCHIVE)/$(PROJECT)-$(REVISION).tar.bz2
+dist-archive-xz: $(PATH_DIST_ARCHIVE)/$(PROJECT)-$(REVISION).tar.xz
 
 .PHONY: dist-info
 dist-info: ## Shows distribution files with sizes and total
@@ -180,7 +177,7 @@ help: ## This command
 					main_rules+=("$(call fmt_rule,$$rule) ―$${line##*##} $(DIM)[$$origin]$(RESET)") # NOHELP
 					;;
 			esac
-		done < <(grep '##' $(MODULES_PATH)/$$SRC | grep -v NOHELP) # NOHELP
+		done < <(grep '##' $(SDK_MODULES_PATH)/$$SRC | grep -v NOHELP) # NOHELP
 	done
 	if [ ! $${#main_rules[@]} -eq 0 ]; then
 		echo ""
@@ -200,7 +197,7 @@ help-vars: ## Shows available configuration variables
 		while read -r line; do
 			varname=$${line%%=*}
 			vars+=("$(BOLD)$${varname//[:?]/} $(DIM)[$$(dirname $$SRC)]$(RESET)") # NOHELP
-		done < <(grep '=' $(MODULES_PATH)/$$SRC | grep -v NOHELP | grep -v '#')
+		done < <(grep '=' $(SDK_MODULES_PATH)/$$SRC | grep -v NOHELP | grep -v '#')
 	done
 	printf '%s\n' "$${vars[@]}" | sort
 	echo "$(call fmt_tip,Run the following to see the value of the variable: $(BOLD)make print-VARNAME$(DIM))"
@@ -212,7 +209,7 @@ clean: ## Cleans the project, removing build and run files
 		if [ -d "$$dir" ]; then
 			[ "$$dir" = "dist" ] && chmod -R u+w "$$dir" 2>/dev/null || true
 			count=$$(find $$dir -name '*' | wc -l)
-			echo "$(call fmt_action,[STD] Cleaning up directory: $(call fmt_path,$$dir)) [$$count]"
+			echo "$(call fmt_action,[STD] Cleaning up directory: $(call fmt_path,$$dir)) $(call fmt_count,$$count)"
 			rm -rf "$$dir"
 		elif [ -e "$$dir" ]; then
 			echo "$(call fmt_action,[STD] Cleaning up file: $(call fmt_path,$$dir))"
@@ -223,7 +220,31 @@ clean: ## Cleans the project, removing build and run files
 
 .PHONY: shell
 shell: ## Opens a shell setup with the environment
-	@env -i TERM=$(TERM) "PATH=$(ENV_PATH)" "PYTHONPATH=$(ENV_PYTHONPATH)" bash --noprofile --rcfile "$(SDK_PATH)/src/sh/std.prompt.sh"
+	@$(call shell_env,bash --noprofile --rcfile "$(abspath $(SDK_PATH))/src/sh/std.prompt.sh")
+
+.PHONY: todo
+todo: $(call use_tool,grep) ## Shows the to-do list in the project
+	@if [ -n "$(wildcard src)" ]; then
+		echo "$(call fmt_message,Checking FIXME and TODO)"
+		PREVIOUS=""
+		grep --recursive --line-number --extended-regexp --only-matching 'FIXME.*|TODO.*' src | grep -v NOTODO | while IFS= read -r LINE; do # NOTODO
+			FILE=$$(echo "$$LINE" | cut -d: -f1)
+			LNO=$$(echo "$$LINE" | cut -d: -f2)
+			TYPE=$$(echo "$$LINE" | cut -d: -f3)
+			REST=$$(echo "$$LINE" | cut -d: -f4-)
+			if [ "$$PREVIOUS" != "$$FILE" ]; then
+				echo "$(BOLD)$$FILE:$(RESET)"
+				PREVIOUS="$$FILE"
+			fi
+			if [ "$$TYPE" == "FIXME" ]; then # NOTODO
+				COLOR="$(RED)"
+			else
+				COLOR="$(YELLOW)"
+			fi
+			echo "   $$(printf "%04d" $$LNO):$${COLOR}$${TYPE}$(RESET)$${REST}"
+		done
+	fi
+
 
 .PHONY: live-%
 live-%:
@@ -259,6 +280,13 @@ $(PATH_BUILD)/cli-%.task:
 	fi
 	$(call rule_post_cmd)
 
+# -----------------------------------------------------------------------------
+# DEPENDENCIES
+# -----------------------------------------------------------------------------
+
+$(PATH_RUN)/deps/%.data: ## Ensures the given data file exists
+	@mkdir -p "$(dir $@)"
+	echo "$*" > "$@"
 
 # Links dotfiles, prefixed with a dot
 define prep-link
@@ -284,6 +312,12 @@ $(1): $(2)
 	fi
 $(EOL)
 endef
+
+.PRECIOUS: $(PATH_RUN)/%
+.ONESHELL:
+.FORCE:
+.NOTINTERMEDIATE:
+
 
 # --
 # Links configuration files

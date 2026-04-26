@@ -36,7 +36,8 @@ SDK_PATH:=$(subst //,,$(dir $(lastword $(MAKEFILE_LIST)))/)
 SDK_FLAGS?=
 
 ifeq ($(filter no-check-version,$(SDK_FLAGS)),)
-$(info $(shell env MAKEFLAGS="--silent" make -f $(SDK_PATH)/setup.mk check-version SDK_FLAGS=no-check-version))
+SDK_VERSION_CHECK:=$(strip $(shell env MAKEFLAGS="--silent" make -f $(SDK_PATH)/setup.mk check-version SDK_FLAGS=no-check-version))
+$(if $(SDK_VERSION_CHECK),$(info $(SDK_VERSION_CHECK)))
 include $(SDK_PATH)/src/mk/sdk.mk
 endif
 

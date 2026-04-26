@@ -1,9 +1,16 @@
 # --
 # Project name (defaults to current directory name)
 PROJECT?=$(notdir $(CURDIR))
+COMPONENT?=main
+TENANCY?=default
+ENVIRONMENT?=local
+DEPLOYMENT?=main
+TIMESTAMP=$(shell date +"%Y%m%dT%H%M%S")
+
+# An extensible list of shortcodes that remap a 4 letter normalized shortcode to a nicer code.
+SHORTCODES?=defa:dfl loca:loc deve:dev stag:sta test:tst prod:prd
 
 DEFAULT_RULE?=help
-
 
 ## Alias to Git
 GIT?=git
@@ -17,29 +24,31 @@ NO_COLOR?=
 # Where the sources are
 PATH_SRC?=src
 # --
-# Where the runtime files are store
-PATH_RUN?=run
-# --
 # Where source dependencies are downloaded
 PATH_DEPS?=deps
 # --
 # Where assets are built
 PATH_BUILD?=build
+# --
+# Where distribution files are stored
+PATH_DIST?=dist
+# --
+# Where the runtime files are store
+PATH_RUN?=run
+# --
+#  Where tasks are built
+PATH_RUN_TASK?=$(PATH_RUN)/task
 
+#  Where runtime dependencies are stored (e.g. for `run` and `test` rules)
+PATH_RUN_DEPS?=$(PATH_RUN)/deps
 # --
 # Where distribution assets are built
-PATH_DIST?=dist/package
+PATH_DIST_PACKAGE?=$(PATH_DIST)/package
+PATH_DIST_ARCHIVE?=$(PATH_DIST)/archive
 
 # --
 # Revision identifier for distributions
 REVISION?=$(shell git rev-parse --short HEAD)
-
-# --
-# Distribution mode controls what gets included in dist output.
-# Supports multiple space-separated modes:
-#   js:module - Include individual JS modules in dist/lib/js/*
-#   js:bundle - Include bundled JS assets in dist/www/
-DIST_MODE?=js:module
 
 # --
 # Where tests are located
@@ -50,8 +59,16 @@ BASE_PATH?=$(PATH)
 BASE_PYTHONPATH?=$(PYTHONPATH)
 BASE_LDLIBRARYPATH?=$(LDLIBRARYPATH)
 
+# FIXME: Should be moved to a mise package
 # -- ## Commands
 CMD=mise x --
+
+# -- ## Shell
+
+# Defines variables that can be overriden in the Makefile with `EVN_`.
+SHELL_ENV=TERM LOCALE LC_LOCALE USER HOME MANPATH PATH PYTHONPATH LD_LIBRARY_PATH
+# Make variables exported as shell variables
+SHELL_EXPORTS+=SDK_PATH PROJECT COMPONENT ENVIRONMENT DEPLOYMENT
 
 # -- ## Phases
 PREP_ALL?=## Dependencies that will be met by `make prep`
@@ -136,11 +153,11 @@ endif
 
 # --
 # Lists all source files defined in the modules like `std/lib.mk std/vars.mk`
-MODULES_SOURCES:=$(patsubst $(MODULES_PATH)/%,%,$(wildcard $(MODULES_PATH)/*/*.mk))
+MODULES_SOURCES:=$(patsubst $(SDK_MODULES_PATH)/%,%,$(wildcard $(SDK_MODULES_PATH)/*/*.mk))
 
 # --
 # Lists all available modules, like `std prep run`
-MODULES_AVAILABLE:=$(foreach M,$(wildcard $(MODULES_PATH)/*),$(if $(wildcard $M/*.mk),$(notdir $M)))
+SDK_MODULES_AVAILABLE:=$(foreach M,$(wildcard $(SDK_MODULES_PATH)/*),$(if $(wildcard $M/*.mk),$(notdir $M)))
 
 USE_CLI_CHECK+=|| which $1 2> /dev/null
 # EOF

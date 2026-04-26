@@ -1,6 +1,6 @@
 PORT?=8000
 
-WWW_PATH=$(PATH_DIST)/www
+PATH_DIST_WWW=$(PATH_DIST)/www
 
 # --
 # HTML Tidy command via mise
@@ -52,52 +52,61 @@ RUN_ALL+=$(WWW_RUN_ALL)
 
 # HTML: from build/html (tidied) to dist/www
 WWW_DIST_HTML=\
-	$(SOURCES_HTML:$(PATH_SRC)/html/%.html=$(PATH_DIST)/www/%.html)
+	$(SOURCES_HTML:$(PATH_SRC)/html/%.html=$(PATH_DIST_WWW)/%.html)
 
 # XML: from build/xml (transformed) to dist/www
 WWW_DIST_XML=\
-	$(SOURCES_XML:$(PATH_SRC)/xml/%.xml=$(PATH_DIST)/www/%.html)
+	$(SOURCES_XML:$(PATH_SRC)/xml/%.xml=$(PATH_DIST_WWW)/%.html)
 
 # JS/TS: reuse JS module build outputs (BUILD_JS -> dist/www/lib/js)
-# Only included if DIST_MODE contains "js:module"
+# Only included if WWW_DIST_MODE contains "js:module"
 WWW_DIST_JS=\
-	$(if $(findstring js:module,$(DIST_MODE)),$(patsubst $(JS_BUILD_PATH)/%,$(PATH_DIST)/www/lib/js/%,$(BUILD_JS)))
+	$(if $(findstring js:module,$(WWW_DIST_MODE)),$(patsubst $(JS_BUILD_PATH)/%,$(PATH_DIST_WWW)/lib/js/%,$(BUILD_JS)))
 
 # CSS: copy from src/css to dist/www/lib/css
 WWW_DIST_CSS=\
-	$(SOURCES_CSS:$(PATH_SRC)/css/%.css=$(PATH_DIST)/www/lib/css/%.css)
+	$(SOURCES_CSS:$(PATH_SRC)/css/%.css=$(PATH_DIST_WWW)/lib/css/%.css)
 
 # CSS from JS: from build/css (compiled) to dist/www/lib/css
 WWW_DIST_CSS_JS=\
-	$(SOURCES_CSS_JS:$(PATH_SRC)/css/%.js=$(PATH_DIST)/www/lib/css/%.css)
+	$(SOURCES_CSS_JS:$(PATH_SRC)/css/%.js=$(PATH_DIST_WWW)/lib/css/%.css)
 
 # JSON: copy from src/json to dist/www/lib/json
 WWW_DIST_JSON=\
-	$(SOURCES_JSON:$(PATH_SRC)/json/%.json=$(PATH_DIST)/www/lib/json/%.json)
+	$(SOURCES_JSON:$(PATH_SRC)/json/%.json=$(PATH_DIST_WWW)/lib/json/%.json)
 
 # Data: copy from src/data to dist/www/data (preserve structure)
 WWW_DIST_DATA=\
-	$(SOURCES_DATA:$(PATH_SRC)/data/%=$(PATH_DIST)/www/data/%)
+	$(SOURCES_DATA:$(PATH_SRC)/data/%=$(PATH_DIST_WWW)/data/%)
 
 # Static: copy from src/static to dist/www/static (preserve structure)
 WWW_DIST_STATIC=\
-	$(SOURCES_STATIC:$(PATH_SRC)/static/%=$(PATH_DIST)/www/static/%)
+	$(SOURCES_STATIC:$(PATH_SRC)/static/%=$(PATH_DIST_WWW)/static/%)
 
 # =============================================================================
 # BUNDLE (Standalone production build assets)
 # =============================================================================
 
 # UICSS compiled to static CSS (for production)
-WWW_BUNDLE_UICSS?=$(PATH_DIST)/www/ui.css
+WWW_BUNDLE_UICSS?=$(PATH_DIST_WWW)/ui.css
 
 # Project CSS copied to dist
-WWW_BUNDLE_CSS?=$(PATH_DIST)/www/style.css
+WWW_BUNDLE_CSS?=$(PATH_DIST_WWW)/style.css
 
 # Production index.html (only when JS_BUNDLE_ENTRY is set)
-WWW_BUNDLE_INDEX?=$(if $(JS_BUNDLE_ENTRY),$(PATH_DIST)/www/index.html)
+WWW_BUNDLE_INDEX?=$(if $(JS_BUNDLE_ENTRY),$(PATH_DIST_WWW)/index.html)
 
 # Debug index.html (only when JS_BUNDLE_ENTRY is set)
-WWW_BUNDLE_DEBUG_INDEX?=$(if $(JS_BUNDLE_ENTRY),$(PATH_DIST)/www/index.debug.html)
+WWW_BUNDLE_DEBUG_INDEX?=$(if $(JS_BUNDLE_ENTRY),$(PATH_DIST_WWW)/index.debug.html)
+
+# FIXME: This should be moved to js or www
+# --
+# Distribution mode controls what gets included in dist output.
+# Supports multiple space-separated modes:
+#   js:module - Include individual JS modules in dist/lib/js/*
+#   js:bundle - Include bundled JS assets in dist/www/
+WWW_DIST_MODE?=js:module
+
 
 WWW_DIST_BUNDLE=\
 	$(WWW_BUNDLE_UICSS)\
@@ -115,7 +124,7 @@ WWW_DIST_ALL=\
 	$(WWW_DIST_JSON)\
 	$(WWW_DIST_DATA)\
 	$(WWW_DIST_STATIC)\
-	$(if $(findstring js:bundle,$(DIST_MODE)),$(WWW_DIST_BUNDLE))
+	$(if $(findstring js:bundle,$(WWW_DIST_MODE)),$(WWW_DIST_BUNDLE))
 
 DIST_ALL+=$(WWW_DIST_ALL)
 

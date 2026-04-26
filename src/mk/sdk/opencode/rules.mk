@@ -77,7 +77,7 @@ opencode-repair-lattice: ## Repairs the OpenCode Lattice helper install
 	echo "$(call fmt_result,[OPC] Lattice MCP helper repaired)"
 	@$(call rule_post_cmd)
 
-$(PATH_RUN)/tasks/opencode-install.task: $(call use_cli,curl) ## Installs the OpenCode CLI when missing
+$(PATH_RUN_TASK)s/opencode-install.task: $(call use_cli,curl) ## Installs the OpenCode CLI when missing
 	@$(call rule_pre_cmd)
 	@if ! command -v opencode >/dev/null 2>&1; then
 		echo "$(call fmt_action,[OPC] Installing OpenCode CLI...)"
@@ -93,7 +93,7 @@ $(PATH_RUN)/tasks/opencode-install.task: $(call use_cli,curl) ## Installs the Op
 	fi
 	@$(call rule_post_cmd)
 
-$(PATH_RUN)/tasks/opencode-matryoshka.task: $(call use_cli,bun) ## Installs the Lattice MCP helper when missing
+$(PATH_RUN_TASK)s/opencode-matryoshka.task: $(call use_cli,bun) ## Installs the Lattice MCP helper when missing
 	@$(call rule_pre_cmd)
 	@if command -v $(OPENCODE_LATTICE_BINARY) >/dev/null 2>&1; then
 		echo "$(call fmt_result,[OPC] $(OPENCODE_LATTICE_BINARY) is already available)"
@@ -103,7 +103,7 @@ $(PATH_RUN)/tasks/opencode-matryoshka.task: $(call use_cli,bun) ## Installs the 
 	@touch "$@"
 	@$(call rule_post_cmd)
 
-$(PATH_RUN)/tasks/opencode-setup.task: $(PATH_RUN)/tasks/opencode-install.task $(PATH_RUN)/tasks/opencode-matryoshka.task opencode.jsonc ## Verifies the OpenCode local setup
+$(PATH_RUN_TASK)s/opencode-setup.task: $(PATH_RUN_TASK)s/opencode-install.task $(PATH_RUN_TASK)s/opencode-matryoshka.task opencode.jsonc ## Verifies the OpenCode local setup
 	@$(call rule_pre_cmd)
 	$(call opencode_check)
 	@touch "$@"

@@ -1,0 +1,5 @@
+# A whitelist for tools that can be installed, the format is
+# tool-name=repo:packagename,…
+psql=brew:libpq:psql,rpm:postgres
+gmake=brew:gmake,rpm:make
+

@@ -119,7 +119,7 @@ run/%: src/xml/%
 # --
 # HTML: Copy tidied HTML from build/html to dist/www
 # This rule copies tidied HTML files from the build directory to the distribution directory.
-$(PATH_DIST)/www/%.html: $(PATH_BUILD)/html/%.html
+$(PATH_DIST_WWW)/%.html: $(PATH_BUILD)/html/%.html
 	@$(call rule_pre_cmd)
 	@mkdir -p "$(dir $@)"
 	cp -Lp "$<" "$@"
@@ -127,7 +127,7 @@ $(PATH_DIST)/www/%.html: $(PATH_BUILD)/html/%.html
 # --
 # XML: Copy transformed HTML from build/xml to dist/www
 # This rule copies transformed HTML files from the build directory to the distribution directory.
-$(PATH_DIST)/www/%.html: $(PATH_BUILD)/xml/%.html
+$(PATH_DIST_WWW)/%.html: $(PATH_BUILD)/xml/%.html
 	@$(call rule_pre_cmd)
 	@mkdir -p "$(dir $@)"
 	cp -Lp "$<" "$@"
@@ -135,7 +135,7 @@ $(PATH_DIST)/www/%.html: $(PATH_BUILD)/xml/%.html
 # --
 # JS: Copy from JS module build outputs (build/lib/js) to dist/www/lib/js
 # This rule copies JavaScript files from the build directory to the distribution directory.
-$(PATH_DIST)/www/lib/js/%.js: $(JS_BUILD_PATH)/%.js
+$(PATH_DIST_WWW)/lib/js/%.js: $(JS_BUILD_PATH)/%.js
 	@$(call rule_pre_cmd)
 	@mkdir -p "$(dir $@)"
 	cp -Lp "$<" "$@"
@@ -143,7 +143,7 @@ $(PATH_DIST)/www/lib/js/%.js: $(JS_BUILD_PATH)/%.js
 # --
 # CSS: Copy from src/css to dist/www/lib/css
 # This rule copies CSS files from the source directory to the distribution directory.
-$(PATH_DIST)/www/lib/css/%.css: $(PATH_SRC)/css/%.css
+$(PATH_DIST_WWW)/lib/css/%.css: $(PATH_SRC)/css/%.css
 	@$(call rule_pre_cmd)
 	@mkdir -p "$(dir $@)"
 	cp -Lp "$<" "$@"
@@ -151,7 +151,7 @@ $(PATH_DIST)/www/lib/css/%.css: $(PATH_SRC)/css/%.css
 # --
 # CSS from JS: Copy compiled CSS from build/css to dist/www/lib/css
 # This rule copies compiled CSS files from the build directory to the distribution directory.
-$(PATH_DIST)/www/lib/css/%.css: $(PATH_BUILD)/css/%.css
+$(PATH_DIST_WWW)/lib/css/%.css: $(PATH_BUILD)/css/%.css
 	@$(call rule_pre_cmd)
 	@mkdir -p "$(dir $@)"
 	cp -Lp "$<" "$@"
@@ -159,7 +159,7 @@ $(PATH_DIST)/www/lib/css/%.css: $(PATH_BUILD)/css/%.css
 # --
 # JSON: Copy from src/json to dist/www/lib/json
 # This rule copies JSON files from the source directory to the distribution directory.
-$(PATH_DIST)/www/lib/json/%.json: $(PATH_SRC)/json/%.json
+$(PATH_DIST_WWW)/lib/json/%.json: $(PATH_SRC)/json/%.json
 	@$(call rule_pre_cmd)
 	@mkdir -p "$(dir $@)"
 	cp -Lp "$<" "$@"
@@ -167,7 +167,7 @@ $(PATH_DIST)/www/lib/json/%.json: $(PATH_SRC)/json/%.json
 # --
 # Data: Copy from src/data to dist/www/data (preserve structure)
 # This rule copies data files from the source directory to the distribution directory.
-$(PATH_DIST)/www/data/%: $(PATH_SRC)/data/%
+$(PATH_DIST_WWW)/data/%: $(PATH_SRC)/data/%
 	@$(call rule_pre_cmd)
 	@mkdir -p "$(dir $@)"
 	cp -Lp "$<" "$@"
@@ -175,7 +175,7 @@ $(PATH_DIST)/www/data/%: $(PATH_SRC)/data/%
 # --
 # Static: Copy from src/static to dist/www/static (preserve structure)
 # This rule copies static files from the source directory to the distribution directory.
-$(PATH_DIST)/www/static/%: $(PATH_SRC)/static/%
+$(PATH_DIST_WWW)/static/%: $(PATH_SRC)/static/%
 	@$(call rule_pre_cmd)
 	@mkdir -p "$(dir $@)"
 	cp -Lp "$<" "$@"

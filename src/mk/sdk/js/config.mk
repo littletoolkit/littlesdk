@@ -15,8 +15,8 @@ JS_SERVER_ENTRY?=
 # --
 # Bundle configuration for standalone production builds
 JS_BUNDLE_ENTRY?=
-JS_BUNDLE_OUTPUT?=$(PATH_DIST)/www/$(PROJECT).min.js
-JS_BUNDLE_DEBUG_OUTPUT?=$(PATH_DIST)/www/$(PROJECT).js
+JS_BUNDLE_OUTPUT?=$(PATH_DIST_WWW)/$(PROJECT).min.js
+JS_BUNDLE_DEBUG_OUTPUT?=$(PATH_DIST_WWW)/$(PROJECT).js
 JS_BUNDLE_EXTERNAL?=
 
 # --
@@ -67,7 +67,7 @@ CHECK_ALL+=$(if $(SOURCES_JS)$(SOURCES_TS),js-check)
 FMT_ALL+=$(if $(SOURCES_JS)$(SOURCES_TS),js-fmt)
 
 # Only add individual JS modules if DIST_MODE contains "js:module"
-DIST_ALL+=$(if $(findstring js:module,$(DIST_MODE)),$(DIST_JS))
+# DIST_ALL+=$(if $(findstring js:module,$(DIST_MODE)),$(DIST_JS))
 # Add server executable if JS_SERVER_ENTRY is set
 DIST_ALL+=$(if $(JS_SERVER_ENTRY),$(JS_SERVER_OUTPUT))
 
