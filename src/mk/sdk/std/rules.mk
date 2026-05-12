@@ -249,7 +249,9 @@ todo: $(call use_tool,grep) ## Shows the to-do list in the project
 .PHONY: live-%
 live-%:
 	@$(call rule_pre_cmd)
-	echo $(SOURCES_ALL) | xargs -n1 echo | entr -c -r bash -c 'sleep 0.25 && make $* $(MAKEFLAGS)'
+	# Use recursive $(MAKE) so flags propagate safely; appending $(MAKEFLAGS)
+	# can leak short option letters (e.g. "r") as bogus targets.
+	echo $(SOURCES_ALL) | xargs -n1 echo | entr -c -r bash -c 'sleep 0.25 && $(MAKE) $*'
 
 .PHONY: print-%
 print-%:
