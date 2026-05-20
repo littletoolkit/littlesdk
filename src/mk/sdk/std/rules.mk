@@ -53,7 +53,7 @@ test: $(PREP_ALL) $(TEST_ALL) ## Runs tests
 .PHONY: dist
 dist: $(PREP_ALL) $(DIST_ALL)
 	@$(call rule_post_cmd)
-	mkdi -p "$(PATH_DIST)"
+	mkdir -p "$(PATH_DIST)"
 
 # Reusable function for creating compressed archives
 # Parameters:
