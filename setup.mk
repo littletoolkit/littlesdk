@@ -54,8 +54,11 @@ endif
 check-version: ## Checks the version of SDK against expected version
 	@
 	if [ "$(filter no-check-version,$(SDK_FLAGS))" == "" ]; then
-		this_version=$$(git -C $(SDK_PATH) rev-parse HEAD)
-		that_version=$$(git -C $(SDK_PATH) rev-parse $(SDK_VERSION))
+		this_version=$$(git -C $(SDK_PATH) rev-parse HEAD 2>/dev/null || true)
+		that_version=$$(git -C $(SDK_PATH) rev-parse $(SDK_VERSION) 2>/dev/null || true)
+		if [ -z "$$this_version" ] || [ -z "$$that_version" ]; then
+			exit 0
+		fi
 		if [ "$$this_version" != "$$that_version" ]; then
 			echo "--- SDK is at $$that_version [$(SDK_VERSION)] (was $$this_version)"
 		else

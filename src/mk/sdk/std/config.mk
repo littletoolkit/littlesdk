@@ -48,7 +48,7 @@ PATH_DIST_ARCHIVE?=$(PATH_DIST)/archive
 
 # --
 # Revision identifier for distributions
-REVISION?=$(shell git rev-parse --short HEAD)
+REVISION?=$(shell git rev-parse --short HEAD 2>/dev/null || printf '%s' unknown)
 
 # --
 # Where tests are located
@@ -127,10 +127,8 @@ SOURCES_DATA=$(call file_find,$(PATH_SRC)/data,*) ## List of data files
 SOURCES_STATIC=$(call file_find,$(PATH_SRC)/static,*) ## List of static files
 SOURCES_ETC=$(call file_find,$(PATH_SRC)/etc,*) ## List of etc files
 
-
-
 SDK_DOTFILES=$(filter $(SDK_PATH)/etc/_%,$(call file_find,$(SDK_PATH)/etc,*)) ## List of dotfiles in SDK
-SDK_ETCFILES=$(filter-out $(SDK_PATH)/etc/_%,$(call file_find,$(SDK_PATH)/etc,*)) ## List of dotfiles in SDK
+SDK_ETCFILES=$(filter-out $(SDK_PATH)/etc/opencode $(SDK_PATH)/etc/opencode/% $(SDK_PATH)/etc/_%,$(call file_find,$(SDK_PATH)/etc,*)) ## List of dotfiles in SDK
 
 PREP_SDK=\
 	$(SDK_DOTFILES:$(SDK_PATH)/etc/_%=.%)\

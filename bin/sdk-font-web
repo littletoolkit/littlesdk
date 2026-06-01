@@ -1,0 +1,203 @@
+#!/usr/bin/env python3
+# encoding: utf-8
+# Updated: 2026-06-27
+
+"""Convert font files into web fonts and generate matching CSS."""
+
+from __future__ import annotations
+
+import argparse
+import glob
+import logging
+import os
+import subprocess
+import sys
+from typing import Iterable
+
+FONT_SOURCE = ("otf", "ttf")
+FONT_PRODUCT = ("eot", "woff2", "woff", "svg")
+FONT_ALL = FONT_PRODUCT + FONT_SOURCE
+FONT_CSS = tuple(ext for ext in FONT_ALL if ext not in ("otf", "woff2"))
+FONTFORGE = "fontforge"
+
+SOURCE_PATH = "src/fonts"
+DEST_PATH = "lib/fonts"
+CSS_PATH = "lib/css/fonts.css"
+
+LOG = logging.getLogger(os.path.basename(__file__))
+
+
+def parse_font_name(name: str) -> tuple[str, str, str]:
+	"""Return ``(family, style, weight)`` from a font basename."""
+	base = os.path.splitext(os.path.basename(name))[0]
+	family, styles = (base.split("-", 1) + ["regular"])[:2]
+	styles = styles.lower()
+	weight = "normal"
+	style = "normal"
+	if "bold" in styles:
+		weight = "700"
+	if "heavy" in styles:
+		weight = "800"
+	if "extraheavy" in styles:
+		weight = "900"
+	elif "extrabold" in styles:
+		weight = "900"
+	elif "fat" in styles:
+		weight = "900"
+	elif "poster" in styles:
+		weight = "900"
+	elif "ultrablack" in styles:
+		weight = "900"
+	elif "black" in styles:
+		weight = "800"
+	elif "semibold" in styles:
+		weight = "600"
+	elif "demibold" in styles:
+		weight = "600"
+	elif "medium" in styles:
+		weight = "500"
+	elif "regular" in styles:
+		weight = "400"
+	elif "normal" in styles:
+		weight = "400"
+	elif "book" in styles:
+		weight = "300"
+	elif "demi" in styles:
+		weight = "300"
+	elif "light" in styles:
+		weight = "200"
+	elif "thin" in styles:
+		weight = "200"
+	elif "extralight" in styles:
+		weight = "100"
+	elif "ultralight" in styles:
+		weight = "100"
+	if "italic" in styles:
+		style = "italic"
+	if "oblique" in styles:
+		style = "oblique"
+	return family, style, weight
+
+
+def list_fonts(path: str | Iterable[str], ext: tuple[str, ...] = FONT_ALL) -> dict[str, list[str]]:
+	"""Return a mapping of font basenames to discovered extensions."""
+	fonts: dict[str, list[str]] = {}
+	paths = glob.glob(os.path.join(path, "*.*")) if isinstance(path, str) else path
+	for item in paths:
+		base = os.path.basename(item)
+		name, suffix = os.path.splitext(base)
+		suffix = suffix.lstrip(".")
+		if suffix in ext:
+			fonts.setdefault(name, []).append(suffix)
+	return fonts
+
+
+def convert_font(source: str, destination: str = DEST_PATH, formats: tuple[str, ...] = FONT_CSS, fontforge: str = FONTFORGE) -> None:
+	"""Convert one font into the configured web font formats."""
+	os.makedirs(destination, exist_ok=True)
+	name = os.path.splitext(os.path.basename(source))[0]
+	family, style, weight = parse_font_name(name)
+	root = os.path.join(destination, name)
+	script = "Open(\"{0}\");".format(source) + ";".join(
+		'Generate("{0}.{1}")'.format(root, ext) for ext in formats
+	)
+	LOG.info("Converting %s (family=%s, style=%s, weight=%s) to %s in %s", source, family, style, weight, ",".join(formats), destination)
+	try:
+		output = subprocess.run([fontforge, "-lang=ff", "-c", script], capture_output=True, text=True, check=False)
+	except FileNotFoundError:
+		LOG.error("fontforge not found: %s", fontforge)
+		raise SystemExit(1)
+	afms = root + ".afm"
+	if os.path.exists(afms):
+		os.unlink(afms)
+	if output.returncode != 0:
+		LOG.error("fontforge error with `%s`", source)
+		if output.stderr:
+			LOG.error(output.stderr.strip())
+
+
+def convert_fonts(source: str = SOURCE_PATH, destination: str = DEST_PATH, fontforge: str = FONTFORGE) -> None:
+	"""Convert every font in a source directory."""
+	fonts = list_fonts(source, FONT_SOURCE)
+	LOG.info("Found %d fonts: %s in %s", len(fonts), ",".join(sorted(fonts)), source)
+	for font in sorted(fonts):
+		path = os.path.join(source, font + "." + fonts[font][0])
+		convert_font(path, destination, fontforge=fontforge)
+
+
+def create_css(source: str = DEST_PATH, output: str | None = CSS_PATH, formats: tuple[str, ...] = FONT_CSS, fonts: dict[str, list[str]] | None = None) -> None:
+	"""Write CSS for the discovered fonts."""
+	css_formats = {
+		"eot": "url('{0}.eot?#iefix') format('embedded-opentype')",
+		"woff": "url('{0}.woff') format('woff')",
+		"woff2": "url('{0}.woff2') format('woff2')",
+		"ttf": "url('{0}.ttf') format('truetype')",
+		"svg": "url('{0}.svg#{1}') format('svg')",
+	}
+	fonts = list_fonts(source) if fonts is None else fonts
+	parts = []
+	outdir = "." if output in (None, "-") else os.path.dirname(output) or "."
+	if output not in (None, "-"):
+		os.makedirs(outdir, exist_ok=True)
+	for key in sorted(fonts):
+		family, style, weight = parse_font_name(key)
+		extensions = fonts[key]
+		relpath = os.path.relpath(os.path.join(source, key), outdir)
+		srcs = [css_formats[ext].format(relpath, family) for ext in formats if ext in extensions]
+		if not srcs:
+			continue
+		parts.append(
+			"@font-face {{\n"
+			"\tfont-family: '{family}';\n"
+			"\tfont-weight: {weight};\n"
+			"\tfont-style: {style};\n"
+			"\tsrc: {src};\n"
+			"}}".format(
+				family=family,
+				weight=weight,
+				style=style,
+				src=",\n\t\t".join(srcs),
+			)
+		)
+	if not parts:
+		css = '.stdkit-font-web {content:"N/A";}'
+	else:
+		css = "\n\n".join(parts)
+	if output in (None, "-"):
+		sys.stdout.write(css)
+	else:
+		LOG.info("Writing CSS `%s`", output)
+		with open(output, "wt", encoding="utf-8") as handle:
+			handle.write(css)
+
+
+def command(argv: list[str] | None = None) -> int:
+	"""Run the command-line interface."""
+	parser = argparse.ArgumentParser(description="Convert fonts to web fonts and generate CSS.")
+	parser.add_argument("fonts", metavar="F", type=str, nargs="*", help="Font files to convert. Defaults to %s." % SOURCE_PATH)
+	parser.add_argument("-o", "--output", help="CSS output file. Use - for stdout.")
+	parser.add_argument("--source", default=SOURCE_PATH, help="Source directory when no font files are passed.")
+	parser.add_argument("--destination", default=DEST_PATH, help="Destination directory for converted font files.")
+	parser.add_argument("--fontforge", default=FONTFORGE, help="FontForge executable.")
+	parser.add_argument("-v", "--verbose", action="count", default=0, help="Increase logging verbosity.")
+	args = parser.parse_args(argv)
+
+	level = logging.WARNING - min(args.verbose, 2) * 10
+	logging.basicConfig(level=level, format="%(name)s: %(message)s")
+
+	if not args.fonts:
+		LOG.info("Converting all fonts from %s to %s", args.source, args.destination)
+		convert_fonts(args.source, args.destination, fontforge=args.fontforge)
+		LOG.info("Generating CSS file %s", args.output or CSS_PATH)
+		create_css(source=args.destination, output=args.output or CSS_PATH)
+		return 0
+
+	parent = os.path.dirname(args.fonts[0]) or "."
+	create_css(parent, output=args.output or CSS_PATH, fonts=list_fonts(args.fonts))
+	return 0
+
+
+if __name__ == "__main__":
+	raise SystemExit(command())
+
+# EOF - vim: syn=python sw=4 ts=4 noet

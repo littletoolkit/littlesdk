@@ -1,11 +1,11 @@
 ---
 name: review-ts
-description: Review and update module documentation using NaturalDocs-style format with markdown.
+description: Review and update TypeScript & JavaScript files
 ---
 
 ## What I do
 
-Review and update the documentation of a module, ensuring clarity, consistency, and completeness. I check for:
+Review and update the documentation of a JS/TS module, ensuring clarity, consistency, and completeness. I check for:
 
 - Proper NaturalDocs-style formatting with markdown support
 - Compliance with AGENTS.md conventions (project headers, section delimiters, EOF marker)
@@ -32,9 +32,32 @@ Review and update the documentation of a module, ensuring clarity, consistency, 
 - Use fenced code blocks for all examples
 - Follow AGENTS.md conventions: project headers, section delimiters, EOF marker
 
-## Documentation Format
+## Conventions
 
-NaturalDocs-style with markdown support.
+Naming:
+- Most functions as `lowercase`, compact Unix/Go-like syntax when one or two words, otherwise `camelCase`
+- Parameters `camelCase`
+- Local variables `snake_case`, use short variables names (`i`,`j`,`k`,`l`, etc) for a short scope
+- When writing a module, make sure classes and objects share one or two common prefix (eg. `storage` module, `Storage`, `Stored` prefixes)
+
+Structure:
+- Imports at the beginning
+- Utilities first
+- Functions grouped logically
+- High level APIs functions last
+- Export explicit at the end of the file
+
+Documentation:
+- Natural docs, in `//` comments
+- Comment when using tricks or using hardcoded values
+- Compact, not verbose
+
+Style:
+- Functional, data-driven, declarative
+- Use OO/classes to scope operations, or when the data needs to be internal/encapsulated.
+- Composable, Unix-style
+- Compact (minimize lines) while being readable
+- Elegant and balanced
 
 ### File Template
 
@@ -83,9 +106,9 @@ export { {{name}} }
 ### Examples
 
 ```typescript
-// Project: LittleMake
-// Author:  Sebastien Pierre
-// License: MIT
+// Project: ACME Toolkit
+// Author:  ACME.inc
+// License: Proprietary
 // Created: 2024-01-01
 
 // Module: math

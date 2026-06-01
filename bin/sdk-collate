@@ -1,0 +1,256 @@
+#!/usr/bin/env python3
+"""Extract translatable strings or convert a CSV file to JSON."""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import logging
+import os
+import sys
+import xml.etree.ElementTree as ET
+
+PATH_CONFIGURATION = "src/data/collate.json"
+PATH_TEMPLATES = "src/data/string-templates.json"
+
+LOG = logging.getLogger("collate")
+
+
+def is_str(value):
+	"""Return whether ``value`` is a string."""
+	return isinstance(value, str)
+
+
+def is_list(value):
+	"""Return whether ``value`` is a list-like sequence."""
+	return isinstance(value, (list, tuple))
+
+
+def is_dict(value):
+	"""Return whether ``value`` behaves like a mapping."""
+	return isinstance(value, dict)
+
+
+def load_json(path):
+	"""Load JSON data from ``path`` or return an empty mapping."""
+	if not os.path.exists(path):
+		return {}
+	try:
+		with open(path, "rt", encoding="utf-8") as handle:
+			return json.load(handle)
+	except (OSError, json.JSONDecodeError) as exc:
+		LOG.warning("Could not load JSON %s: %s", path, exc)
+		return {}
+
+
+def _source_name(path, base="components"):
+	"""Return a stable source name for extracted strings."""
+	if base in path:
+		return os.path.relpath(path, base).split(os.sep, 1)[0]
+	return os.path.splitext(os.path.basename(path))[0]
+
+
+class XMLExtractor:
+	"""Extract text nodes from XML files."""
+
+	def extract(self, path, component=None):
+		"""Return a list of string records extracted from ``path``."""
+		try:
+			root = ET.parse(path).getroot()
+		except (ET.ParseError, OSError) as exc:
+			LOG.warning("Could not parse XML %s: %s", path, exc)
+			return []
+		source = component or _source_name(path)
+		strings = []
+		for text in root.itertext():
+			value = " ".join(text.split())
+			if value:
+				strings.append({"type": "text", "source": source, "value": value})
+		return strings
+
+
+class JSONExtractor:
+	"""Extract string values from configured JSON files."""
+
+	def __init__(self, path=PATH_CONFIGURATION):
+		"""Load the JSON extraction configuration."""
+		self._configPath = path
+		self.config = load_json(path)
+
+	def extract(self, path):
+		"""Extract translation strings from ``path``."""
+		try:
+			with open(path, "rt", encoding="utf-8") as handle:
+				data = json.load(handle)
+		except (OSError, json.JSONDecodeError) as exc:
+			LOG.warning("Could not load JSON %s: %s", path, exc)
+			return []
+		config_json = self.config.get("json", {})
+		names = list(config_json.keys())
+		name = os.path.basename(path).rsplit(".", 1)[0]
+		config_strings = []
+		for group, strings in self.config.get("strings", {}).items():
+			for text in strings:
+				config_strings.append({"type": "text", "source": group, "value": text})
+		if name == "collate" or name.startswith("strings-"):
+			return config_strings
+		if name not in names:
+			LOG.warning("Data file not configured in %s: %s / %s", self._configPath, path, names)
+			return config_strings
+		keys_list = config_json[name]
+		if not keys_list:
+			return config_strings
+		LOG.info("Using key list for %s: %s", path, keys_list)
+		res = {}
+		for keys in keys_list:
+			keys = keys.split(".") if is_str(keys) else keys
+			assert isinstance(keys, list)
+			for value, extracted_path in self._extract(data, keys):
+				path_name = ".".join(str(part) for part in [name] + extracted_path)
+				if value not in res:
+					res[value] = path_name
+		return config_strings + [{"source": res[key], "value": key, "type": "text"} for key in sorted(res)]
+
+	def _extract(self, value, keys, path=None):
+		"""Yield ``(value, path)`` pairs for a key path."""
+		path = path or []
+		if not keys:
+			yield value, path
+			return
+		key, rest = keys[0], keys[1:]
+		if key == "." and len(keys) == 1:
+			if value and is_dict(value):
+				for k in value:
+					yield k, path
+			elif value:
+				LOG.error("Data path %s expected to be a dictionary, got %r", path, value)
+		elif key == "*":
+			if is_list(value):
+				for index, item in enumerate(value):
+					yield from self._extract(item, rest, path + [index])
+			elif is_dict(value):
+				for k, item in value.items():
+					yield from self._extract(item, rest, path + [k])
+			elif value:
+				LOG.error("Data path %s expected to be a dictionary or list, got %r", path, value)
+		elif key == "@":
+			yield value, path
+		else:
+			if is_list(value):
+				yield from self._extract(value[int(key)], rest, path + [key])
+			elif is_dict(value) and key in value:
+				yield from self._extract(value[key], rest, path + [key])
+			elif value:
+				LOG.error("Data path %s expected to be a dictionary or list, got %r", path, value)
+
+
+class Strings:
+	"""Collect strings and write them as CSV."""
+
+	def __init__(self):
+		self.all = []
+
+	def add(self, string):
+		"""Append a string record."""
+		self.all.append(string)
+		return string
+
+	def addTemplates(self, templates):
+		"""Merge string templates into the collection."""
+		if is_str(templates):
+			templates = load_json(templates)
+		template_rules = None
+		for key in templates:
+			if key == "templates":
+				template_rules = templates[key]
+			else:
+				for value in templates[key]:
+					self.add({"type": "text", "source": "templates." + key, "value": value})
+		if not template_rules:
+			return
+		for name, template in template_rules.items():
+			values = templates.get(template.get("values")) if "values" in template else []
+			values = values or []
+			text = template.get("template") or ""
+			self.add({"type": "template", "source": "templates." + name, "value": text})
+			for value in values:
+				self.add({"type": "template", "source": "templates." + name, "id": name + "-" + value, "value": name + "-" + value})
+
+	def writeCSV(self, output):
+		"""Write the collected strings as CSV."""
+		writer = csv.writer(output, quoting=csv.QUOTE_ALL)
+		values = set()
+		writer.writerow(("ID", "Source", "Type", "Value", "Translation"))
+		for item in self.all:
+			value = item["value"]
+			if value in values:
+				continue
+			values.add(value)
+			writer.writerow((item.get("id") or "*", item["source"], item["type"], item["value"], ""))
+
+
+def extract():
+	"""Extract strings from the project tree."""
+	xml_extractor = XMLExtractor()
+	json_extractor = JSONExtractor()
+	strings = Strings()
+	if os.path.isdir("components"):
+		for root, _, files in os.walk("components"):
+			for name in files:
+				if name.endswith(".xml") or name.endswith(".xml.paml"):
+					path = os.path.join(root, name)
+					LOG.info("Extracting strings from %r", path)
+					for item in xml_extractor.extract(path):
+						strings.add(item)
+	if os.path.isdir("data"):
+		for name in os.listdir("data"):
+			if name.endswith(".json"):
+				path = os.path.join("data", name)
+				LOG.info("Extracting strings from %r", path)
+				for item in json_extractor.extract(path):
+					strings.add(item)
+	if os.path.exists(PATH_TEMPLATES):
+		strings.addTemplates(PATH_TEMPLATES)
+	strings.writeCSV(sys.stdout)
+
+
+def generate(path, default=None):
+	"""Generate a JSON translation map from CSV data."""
+	result = {}
+	LOG.info("Reading translations strings at %s", path)
+	with open(path, "rt", encoding="utf-8", newline="") as handle:
+		reader = csv.reader(handle)
+		for index, row in enumerate(reader):
+			if index == 0 or len(row) < 5:
+				continue
+			_, _, _, value, translation = row[:5]
+			if translation or default:
+				result[value] = translation or default or ""
+	json.dump(result, sys.stdout)
+	return result
+
+
+def command(argv=None):
+	"""Run the command-line interface."""
+	parser = argparse.ArgumentParser(description="Extract translatable strings or convert CSV files to JSON.")
+	parser.add_argument("files", metavar="FILE", type=str, nargs="*", help="CSV files to convert to JSON.")
+	parser.add_argument("-d", "--default", type=str, default=None, help="Default translation value.")
+	parser.add_argument("-v", "--verbose", action="count", default=0, help="Increase logging verbosity.")
+	options = parser.parse_args(sys.argv[1:] if argv is None else argv)
+
+	level = logging.WARNING - min(options.verbose, 2) * 10
+	logging.basicConfig(level=level, format="%(name)s: %(message)s")
+
+	if options.files:
+		for path in options.files:
+			generate(path, default=options.default)
+	else:
+		extract()
+	return 0
+
+
+if __name__ == "__main__":
+	raise SystemExit(command())
+
+# EOF - vim: ts=4 sw=4 noet

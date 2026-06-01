@@ -111,7 +111,6 @@ endef
 # A generic function to be used when writing a rule. This will create the
 # parent directories for build rules, and log messages for other rules.
 define rule_post_cmd
-	echo "       ⤷  $(DIM)$(if $1,$(if $(word 10,$1),× $(words $1) : $(BOLD)$(wordlist 1,10,$1) …$(wordlist 11,999,$1)) more,× $(words $1) : $(BOLD)$(strip $1)),  $(BOLD)$@$(RESET) ← $(if $(word 10,$^),($(wordlist 1,10,$^) $(BOLD)…$(words $(wordlist 11,999,$^))$(RESET)),($^)))$(RESET)"
 endef
 
 

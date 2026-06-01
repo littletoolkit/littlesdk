@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+# encoding=utf8 ---------------------------------------------------------------
+# Project           : Font Anonymiser
+# -----------------------------------------------------------------------------
+# Author            : Sébastien Pierre
+# License           : BSD License
+# -----------------------------------------------------------------------------
+# Creation date     : 2015-09-09
+# Last modification : 2026-06-27
+# -----------------------------------------------------------------------------
+
+"""Anonymize font file names and rewrite CSS references."""
+
+from __future__ import annotations
+
+import argparse
+import glob
+import hashlib
+import logging
+import os
+import re
+import shutil
+import sys
+from collections.abc import Iterable
+
+__version__ = "0.0.0"
+LICENSE = "http://ffctn.com/doc/licenses/bsd"
+
+SUFFIX_FONT = ["*.otf", "*.eot", "*.ttf", "*.woff", "*.svg"]
+SUFFIX_CSS = ["*.css", "*.[pc]css"]
+
+RE_SHA1 = re.compile(r"^F[0-9a-f]+$")
+LOG = logging.getLogger(os.path.basename(__file__))
+
+
+def anonymize(text: str | bytes) -> str:
+	"""Return a stable anonymized identifier for ``text``."""
+	data = text.encode("utf-8") if isinstance(text, str) else text
+	for _ in range(10):
+		data = hashlib.sha512(data).hexdigest().encode("ascii")
+	return "F" + hashlib.sha1(data).hexdigest()
+
+
+def anonymze(text: str | bytes) -> str:
+	"""Backward-compatible alias for ``anonymize``."""
+	return anonymize(text)
+
+
+def anonymize_path(path: str, contents: bool = False) -> str:
+	"""Return the anonymized path for ``path``."""
+	dirname = os.path.dirname(path)
+	basename = os.path.basename(path)
+	name, ext = os.path.splitext(basename)
+	if contents:
+		with open(path, "rt", encoding="utf-8") as handle:
+			name = anonymize(handle.read())
+	else:
+		name = anonymize(name)
+	return os.path.join(dirname, name + ext)
+
+
+def anonmyze_path(path: str, contents: bool = False) -> str:
+	"""Backward-compatible alias for ``anonymize_path``."""
+	return anonymize_path(path, contents=contents)
+
+
+def expand_paths(paths: Iterable[str], suffixes: list[str] | None = None):
+	"""Expand directories into matching files."""
+	for group in paths or []:
+		items = [group] if isinstance(group, str) else group
+		for item in items:
+			if os.path.isdir(item):
+				for suffix in suffixes or ():
+					yield from glob.glob(os.path.join(item, suffix))
+			else:
+				yield item
+
+
+def anonmyze_font_file(paths):
+	"""Create anonymized copies of font files and return rename maps."""
+	replace_files = {}
+	replace_families = {}
+	for path in paths:
+		name, ext = os.path.splitext(os.path.basename(path))
+		family_weight = name.split("-")
+		if len(family_weight) != 2:
+			if not (len(name) == 41 and RE_SHA1.match(name)):
+				LOG.warning("Skipping font file %s, expected <FAMILY>-<WEIGHT>%s", path, ext)
+			continue
+		family, weight = family_weight
+		anon_name = anonymize(name)
+		anon_path = os.path.join(os.path.dirname(path), anon_name + ext)
+		if name not in replace_files:
+			replace_files[name] = anon_name
+			LOG.info("Font files %s.* are now %s.*", name, anon_name)
+		for font_family in (family, family + weight):
+			if font_family not in replace_families:
+				replace_families[font_family] = anonymize(font_family)
+				LOG.info("Font family %s is now %s", font_family, replace_families[font_family])
+		if not os.path.exists(anon_path):
+			LOG.info("Creating anonymous copy of %s to %s", path, anon_path)
+			shutil.copyfile(path, anon_path)
+	return replace_files, replace_families
+
+
+def anonmyze_css_contents(paths, replace_files, replace_families):
+	"""Rewrite CSS contents with anonymized font names."""
+	for path in paths:
+		with open(path, "rt", encoding="utf-8") as handle:
+			text = old_text = handle.read()
+		for key, value in replace_files.items():
+			text = text.replace(key, value)
+		for key, value in replace_families.items():
+			text = text.replace(key, value)
+		if text != old_text:
+			LOG.info("Rewriting %s", path)
+			with open(path, "wt", encoding="utf-8") as handle:
+				handle.write(text)
+
+
+def run(args):
+	"""Run the command with parsed arguments."""
+	replace_files, replace_families = anonmyze_font_file(expand_paths(args.fonts, SUFFIX_FONT))
+	anonmyze_css_contents(expand_paths(args.css, SUFFIX_CSS), replace_files, replace_families)
+
+
+def command(argv=None):
+	"""Parse CLI arguments and execute the command."""
+	parser = argparse.ArgumentParser(description="Anonymize CSS files and matching font files.")
+	parser.add_argument("-c", "--css", type=str, nargs="+", action="append", default=[], help="CSS files to anonymize")
+	parser.add_argument("-f", "--fonts", type=str, nargs="+", action="append", default=[], help="Font files to anonymize")
+	parser.add_argument("-v", "--verbose", action="count", default=0, help="Increase logging verbosity.")
+	args = parser.parse_args(sys.argv[1:] if argv is None else argv)
+
+	level = logging.WARNING - min(args.verbose, 2) * 10
+	logging.basicConfig(level=level, format="%(name)s: %(message)s")
+	run(args)
+	return 0
+
+
+if __name__ == "__main__":
+	raise SystemExit(command())
+
+# EOF - vim: ts=4 sw=4 noet syn=python
