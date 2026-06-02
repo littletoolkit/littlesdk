@@ -1,0 +1,413 @@
+#!/usr/bin/env bash
+
+# -----------------------------------------------------------------------------
+#
+# SDK META
+#
+# -----------------------------------------------------------------------------
+
+# Script: sdk-meta
+# Updates source file header metadata from project license and git history.
+
+set -euo pipefail
+
+SDK_META_PATH="$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"/../ &>/dev/null && pwd)"
+# shellcheck source=/dev/null
+source "$SDK_META_PATH/src/sh/lib.sh"
+sdk_lib_load log
+
+SDK_META_REPO_ROOT=""
+SDK_META_LICENSE=""
+
+# -----------------------------------------------------------------------------
+#
+# LICENSE
+#
+# -----------------------------------------------------------------------------
+
+# Function: sdk_meta_trim VALUE
+# Trims leading and trailing whitespace from `VALUE`.
+function sdk_meta_trim {
+	local value="${1:-}"
+	value="${value#"${value%%[![:space:]]*}"}"
+	value="${value%"${value##*[![:space:]]}"}"
+	printf "%s" "$value"
+}
+
+# Function: sdk_meta_infer_license_from_file PATH
+# Infers a short license identifier from the project `LICENSE` file at `PATH`.
+function sdk_meta_infer_license_from_file {
+	local path="$1"
+	if grep -Eiq "apache license[[:space:]]+version[[:space:]]+2\.0" "$path"; then
+		echo "Apache-2.0"
+	elif grep -Eiq "permission is hereby granted, free of charge, to any person obtaining a copy" "$path"; then
+		echo "MIT"
+	elif grep -Eiq "isc license" "$path" || grep -Eiq "permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted" "$path"; then
+		echo "ISC"
+	elif grep -Eiq "redistribution and use in source and binary forms, with or without modification, are permitted" "$path"; then
+		echo "BSD-3"
+	else
+		return 1
+	fi
+}
+
+# Function: sdk_meta_infer_license_from_makefile PATH
+# Extracts `LICENSE=...` from the project `Makefile` at `PATH`.
+function sdk_meta_infer_license_from_makefile {
+	local path="$1"
+	local line=""
+	local value=""
+	line="$(grep -E '^[[:space:]]*LICENSE[[:space:]]*[:?+]?=' "$path" | tail -n 1 || true)"
+	[ -n "$line" ] || return 1
+	value="${line#*=}"
+	value="${value%%#*}"
+	value="$(sdk_meta_trim "$value")"
+	value="${value%\"}"
+	value="${value#\"}"
+	value="${value%\'}"
+	value="${value#\'}"
+	[ -n "$value" ] || return 1
+	echo "$value"
+}
+
+# Function: sdk_meta_resolve_license ROOT
+# Resolves the canonical project license for repository root `ROOT`.
+function sdk_meta_resolve_license {
+	local root="$1"
+	local value=""
+	for path in "$root/LICENSE" "$root/LICENSE.md"; do
+		if [ -f "$path" ]; then
+			if value="$(sdk_meta_infer_license_from_file "$path")"; then
+				echo "$value"
+				return 0
+			fi
+			log_warning "Could not infer license identifier from $path"
+			return 1
+		fi
+	done
+	if [ -f "$root/Makefile" ]; then
+		if value="$(sdk_meta_infer_license_from_makefile "$root/Makefile")"; then
+			echo "$value"
+			return 0
+		fi
+	fi
+	return 1
+}
+
+# -----------------------------------------------------------------------------
+#
+# FILES
+#
+# -----------------------------------------------------------------------------
+
+# Function: sdk_meta_comment_prefix PATH
+# Returns the comment prefix used by source file `PATH`.
+function sdk_meta_comment_prefix {
+	local path="$1"
+	local name="${path##*/}"
+	case "$name" in
+	Makefile | *.mk)
+		echo "#"
+		;;
+	*.sh | *.bash | *.py)
+		echo "#"
+		;;
+	*.js | *.mjs | *.cjs | *.ts | *.tsx)
+		echo "//"
+		;;
+	*)
+		return 1
+		;;
+	esac
+}
+
+# Function: sdk_meta_repo_relative_path ROOT ARG
+# Converts path argument `ARG` to a repository-relative path within `ROOT`.
+function sdk_meta_repo_relative_path {
+	local root="$1"
+	local arg="$2"
+	local absolute=""
+	if [ ! -e "$arg" ]; then
+		log_error "Path does not exist: $arg"
+		return 1
+	fi
+	absolute="$(realpath "$arg")"
+	case "$absolute" in
+	"$root")
+		echo "."
+		;;
+	"$root"/*)
+		echo "${absolute#"$root"/}"
+		;;
+	*)
+		log_error "Path is outside repository root: $arg"
+		return 1
+		;;
+	esac
+}
+
+# Function: sdk_meta_list_targets ROOT ARG...
+# Lists git-tracked files in `ROOT`, optionally filtered by path arguments.
+function sdk_meta_list_targets {
+	local root="$1"
+	shift
+	if [ $# -eq 0 ]; then
+		git -C "$root" ls-files -z
+		return
+	fi
+	local rel_args=()
+	local arg=""
+	for arg in "$@"; do
+		rel_args+=("$(sdk_meta_repo_relative_path "$root" "$arg")")
+	done
+	git -C "$root" ls-files -z -- "${rel_args[@]}"
+}
+
+# -----------------------------------------------------------------------------
+#
+# GIT
+#
+# -----------------------------------------------------------------------------
+
+# Function: sdk_meta_git_created ROOT RELPATH
+# Returns the first committed date for tracked file `RELPATH`.
+function sdk_meta_git_created {
+	local root="$1"
+	local relpath="$2"
+	local value=""
+	value="$(git -C "$root" log --diff-filter=A --follow --format=%cs -- "$relpath" 2>/dev/null | tail -n 1 || true)"
+	if [ -n "$value" ]; then
+		echo "$value"
+	else
+		echo ""
+	fi
+}
+
+# Function: sdk_meta_git_updated ROOT RELPATH
+# Returns the last committed date for tracked file `RELPATH`.
+function sdk_meta_git_updated {
+	local root="$1"
+	local relpath="$2"
+	local value=""
+	value="$(git -C "$root" log -1 --format=%cs -- "$relpath" 2>/dev/null || true)"
+	if [ -n "$value" ]; then
+		echo "$value"
+	else
+		echo ""
+	fi
+}
+
+# -----------------------------------------------------------------------------
+#
+# REWRITE
+#
+# -----------------------------------------------------------------------------
+
+# Function: sdk_meta_process_file ROOT RELPATH
+# Rewrites metadata headers for tracked source file `RELPATH` within `ROOT`.
+function sdk_meta_render_output {
+	local lines_name="$1"
+	local output_name="$2"
+	local prefix="$3"
+	local start="$4"
+	local end="$5"
+	local line_count="$6"
+	local shebang="$7"
+	local has_author="$8"
+	local created="$9"
+	local updated="${10}"
+	local i=0
+	local line=""
+	local license_emitted=1
+	local created_emitted=1
+	local updated_emitted=1
+	local -n lines_ref="$lines_name"
+	local -n output_ref="$output_name"
+
+	output_ref=()
+	if [ -n "$shebang" ]; then
+		output_ref+=("$shebang")
+	fi
+	for ((i = 0; i < start; i++)); do
+		if [ -n "$shebang" ] && [ "$i" -eq 0 ]; then
+			continue
+		fi
+		output_ref+=("${lines_ref[$i]}")
+	done
+	for ((i = start; i <= end; i++)); do
+		line="${lines_ref[$i]}"
+		if [[ "$line" =~ ^[[:space:]]*${prefix}[[:space:]]*License: ]]; then
+			continue
+		fi
+		if [[ "$line" =~ ^[[:space:]]*${prefix}[[:space:]]*Updated: ]]; then
+			continue
+		fi
+		if [[ "$line" =~ ^[[:space:]]*${prefix}[[:space:]]*Modified: ]]; then
+			continue
+		fi
+		if [[ "$line" =~ ^[[:space:]]*${prefix}[[:space:]]*Created: ]]; then
+			if [ "$created_emitted" -ne 0 ] && [ -n "$created" ]; then
+				output_ref+=("$prefix Created: $created")
+				created_emitted=0
+			fi
+			if [ "$updated_emitted" -ne 0 ] && [ -n "$updated" ]; then
+				output_ref+=("$prefix Updated: $updated")
+				updated_emitted=0
+			fi
+			continue
+		fi
+		output_ref+=("$line")
+		if [ "$license_emitted" -ne 0 ] && [[ "$line" =~ ^[[:space:]]*${prefix}[[:space:]]*Author: ]]; then
+			output_ref+=("$prefix License: $SDK_META_LICENSE")
+			license_emitted=0
+		elif [ "$license_emitted" -ne 0 ] && [ "$has_author" -ne 0 ] && [[ "$line" =~ ^[[:space:]]*${prefix}[[:space:]]*Project: ]]; then
+			output_ref+=("$prefix License: $SDK_META_LICENSE")
+			license_emitted=0
+		fi
+	done
+	if [ "$license_emitted" -ne 0 ]; then
+		output_ref+=("$prefix License: $SDK_META_LICENSE")
+	fi
+	if [ "$created_emitted" -ne 0 ] && [ -n "$created" ]; then
+		output_ref+=("$prefix Created: $created")
+	fi
+	if [ "$updated_emitted" -ne 0 ]; then
+		if [ -n "$updated" ]; then
+			output_ref+=("$prefix Updated: $updated")
+		fi
+	fi
+	for ((i = end + 1; i < line_count; i++)); do
+		output_ref+=("${lines_ref[$i]}")
+	done
+}
+
+# Function: sdk_meta_process_file ROOT RELPATH
+# Rewrites metadata headers for tracked source file `RELPATH` within `ROOT`.
+function sdk_meta_process_file {
+	local root="$1"
+	local relpath="$2"
+	local full_path="$root/$relpath"
+	local prefix=""
+	local line_regex=""
+	local created=""
+	local updated=""
+	local tmp=""
+	local line=""
+	local shebang=""
+	local recognized=1
+	local has_author=1
+	local i=0
+	local start=0
+	local end=0
+	local line_count=0
+	local -a lines=()
+	local -a output=()
+
+	if ! prefix="$(sdk_meta_comment_prefix "$relpath")"; then
+		return 0
+	fi
+	if [ ! -f "$full_path" ]; then
+		return 0
+	fi
+
+	mapfile -t lines <"$full_path"
+	line_count="${#lines[@]}"
+	[ "$line_count" -gt 0 ] || return 0
+
+	if [ "$prefix" = "#" ] && [[ "${lines[0]}" =~ ^#! ]]; then
+		shebang="${lines[0]}"
+		start=1
+	fi
+	if [ "$start" -ge "$line_count" ]; then
+		return 0
+	fi
+
+	if [ "$prefix" = "#" ]; then
+		line_regex='^[[:space:]]*#'
+	else
+		line_regex='^[[:space:]]*//'
+	fi
+	if ! [[ "${lines[$start]}" =~ $line_regex ]]; then
+		return 0
+	fi
+
+	end="$start"
+	while [ "$end" -lt "$line_count" ]; do
+		line="${lines[$end]}"
+		if [[ "$line" =~ ^[[:space:]]*$ ]] || [[ "$line" =~ $line_regex ]]; then
+			end=$((end + 1))
+		else
+			break
+		fi
+	done
+	end=$((end - 1))
+
+	for ((i = start; i <= end; i++)); do
+		line="${lines[$i]}"
+		if [[ "$line" =~ ^[[:space:]]*${prefix}[[:space:]]*Project: ]]; then
+			recognized=0
+		fi
+		if [[ "$line" =~ ^[[:space:]]*${prefix}[[:space:]]*Author: ]]; then
+			has_author=0
+			recognized=0
+		fi
+		if [[ "$line" =~ ^[[:space:]]*${prefix}[[:space:]]*Created: ]]; then
+			recognized=0
+		fi
+		if [[ "$line" =~ ^[[:space:]]*${prefix}[[:space:]]*(License|Updated|Modified): ]]; then
+			recognized=0
+		fi
+	done
+	if [ "$recognized" -ne 0 ]; then
+		return 0
+	fi
+
+	created="$(sdk_meta_git_created "$root" "$relpath")"
+	updated="$(sdk_meta_git_updated "$root" "$relpath")"
+	sdk_meta_render_output lines output "$prefix" "$start" "$end" "$line_count" "$shebang" "$has_author" "$created" "$updated"
+	tmp="$(mktemp)"
+	printf "%s\n" "${output[@]}" >"$tmp"
+	if cmp -s "$full_path" "$tmp"; then
+		rm -f "$tmp"
+		return 0
+	fi
+	cat "$tmp" >"$full_path"
+	rm -f "$tmp"
+	log_result "$relpath"
+	return 0
+}
+
+# -----------------------------------------------------------------------------
+#
+# MAIN
+#
+# -----------------------------------------------------------------------------
+
+# Function: sdk_meta_main ARG...
+# Updates metadata for tracked project source files.
+function sdk_meta_main {
+	local root=""
+	local file=""
+	local count=0
+	root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+	if [ -z "$root" ]; then
+		log_error "Not inside a git repository"
+		exit 1
+	fi
+	SDK_META_REPO_ROOT="$root"
+	if ! SDK_META_LICENSE="$(sdk_meta_resolve_license "$root")"; then
+		log_error "Could not resolve project license from LICENSE[.md] or Makefile"
+		exit 1
+	fi
+	log_action "Project root: $root"
+	log_message "License: $SDK_META_LICENSE"
+	while IFS= read -r -d '' file; do
+		count=$((count + 1))
+		sdk_meta_process_file "$root" "$file"
+	done < <(sdk_meta_list_targets "$root" "$@")
+	log_result "Scanned $count tracked file(s)"
+}
+
+sdk_meta_main "$@"
+
+# EOF
