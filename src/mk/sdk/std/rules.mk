@@ -283,6 +283,36 @@ $(PATH_BUILD)/cli-%.task:
 	$(call rule_post_cmd)
 
 # -----------------------------------------------------------------------------
+# COMPRESSION
+# -----------------------------------------------------------------------------
+
+%.gz: %
+	@$(call rule_pre_cmd)
+	if [ -f "$<" ]; then
+		if ! $(CMD) gzip -c -$(COMPRESS_GZ_LEVEL) "$<" > "$@"; then
+			echo "$(call fmt_error,[STD] Failed to create gzipped file)"
+			exit 1
+		fi
+	else
+		echo "$(call fmt_error,[STD] Source file not found: $(call fmt_path,$<))"
+		exit 1
+	fi
+	$(call rule_post_cmd,$@)
+
+%.bz2: %
+	@$(call rule_pre_cmd)
+	if [ -f "$$<" ]; then
+		if ! $(CMD) bzip2 -c -$(COMPRESS_BZ2_LEVEL) "$$<" > "$@"; then
+			echo "$(call fmt_error,[STD] Failed to create bzipped file)"
+			exit 1
+		fi
+	else
+		echo "$(call fmt_error,[STD] Source file not found: $(call fmt_path,$$<))"
+		exit 1
+	fi
+	$(call rule_post_cmd,$@)
+
+# -----------------------------------------------------------------------------
 # DEPENDENCIES
 # -----------------------------------------------------------------------------
 
