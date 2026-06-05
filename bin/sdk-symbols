@@ -1,0 +1,153 @@
+#!/usr/bin/env -S mise x -- usage exec node
+// File: sdk-symbols
+// Lists declared symbols as PATH;TYPE;NAME for diffing.
+
+//USAGE arg "[files]..." help="Files to scan; defaults to src/**/*.*"
+
+import { spawnSync } from "node:child_process"
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
+import { basename, join, relative, resolve } from "node:path"
+
+const cwd = process.cwd()
+const ctags = process.env.SDK_CTAGS ?? "ctags"
+const inputs = process.argv.slice(2)
+const files = inputs.length ? collectInputs(inputs) : collectDefaultFiles()
+const rows = new Set()
+
+for (const file of files) {
+	for (const tag of readTags(file)) {
+		if (tag.kind === "local" || tag.kind === "parameter") continue
+		if (tag.kind === "method" && !tag.name.includes(".")) continue
+		rows.add(formatRow(file, tag.kind, tag.name))
+	}
+
+	for (const entry of readImportExportTags(file)) {
+		rows.add(formatRow(file, entry.kind, entry.name))
+	}
+}
+
+for (const row of [...rows].sort()) {
+	console.log(row)
+}
+
+function formatRow(file, kind, name) {
+	return [relative(cwd, file), kind, name].join(";")
+}
+
+function collectInputs(paths) {
+	const out = new Set()
+	for (const path of paths) {
+		collectPath(resolve(path), out)
+	}
+	return [...out].sort()
+}
+
+function collectDefaultFiles() {
+	const out = new Set()
+	collectPath(resolve("src"), out)
+	return [...out].sort()
+}
+
+function collectPath(path, out) {
+	if (!existsSync(path)) return
+	const st = statSync(path)
+	if (st.isFile()) {
+		if (basename(path).includes(".")) out.add(path)
+		return
+	}
+	if (!st.isDirectory()) return
+	for (const entry of readdirSync(path, { withFileTypes: true })) {
+		if (entry.name.startsWith(".")) continue
+		collectPath(join(path, entry.name), out)
+	}
+}
+
+function readTags(file) {
+	const result = spawnSync(ctags, ["--output-format=json", "--fields=+Kne", "--extras=+q", file], {
+		encoding: "utf8",
+	})
+	if (result.error || !result.stdout) return []
+	const tags = []
+	for (const line of result.stdout.split(/\r?\n/)) {
+		if (!line) continue
+		try {
+			const entry = JSON.parse(line)
+			if (entry._type !== "tag" || !entry.kind || !entry.name) continue
+			tags.push({ kind: entry.kind, name: entry.name })
+		} catch {
+			// Skip malformed ctags output.
+		}
+	}
+	return tags
+}
+
+function readImportExportTags(file) {
+	if (!/\.[cm]?[jt]sx?$/.test(file)) return []
+	let text = ""
+	try {
+		text = readFileSync(file, "utf8")
+	} catch {
+		return []
+	}
+
+	const tags = []
+	for (const match of text.matchAll(/^\s*import\s+(?:type\s+)?([\s\S]*?)\s+from\s+["'][^"']+["'];?/gm)) {
+		for (const name of extractBindings(match[1])) {
+			tags.push({ kind: "import", name })
+		}
+	}
+	for (const match of text.matchAll(/^\s*export\s+(?:type\s+)?\*\s+as\s+([A-Za-z_$][\w$]*)\s+from\s+["'][^"']+["'];?/gm)) {
+		tags.push({ kind: "export", name: match[1] })
+	}
+	for (const match of text.matchAll(/^\s*export\s+(?:type\s+)?\{\s*([\s\S]*?)\s*\}(?:\s+from\s+["'][^"']+["'])?;?/gm)) {
+		for (const name of extractExportSpecifiers(match[1])) {
+			tags.push({ kind: "export", name })
+		}
+	}
+	return tags
+}
+
+function extractBindings(clause) {
+	const out = new Set()
+	const text = clause.replace(/\s+/g, " ").trim()
+	if (!text) return []
+
+	for (const m of text.matchAll(/\*\s+as\s+([A-Za-z_$][\w$]*)/g)) out.add(m[1])
+	for (const m of text.matchAll(/\b([A-Za-z_$][\w$]*)\b(?=\s*,|\s*$)/g)) {
+		if (m[1] !== "as") out.add(m[1])
+	}
+	for (const part of text.split(",")) {
+		const chunk = part.trim()
+		if (!chunk) continue
+		if (chunk.startsWith("{")) {
+			for (const name of extractExportSpecifiers(chunk.slice(1, -1))) out.add(name)
+			continue
+		}
+		const alias = chunk.match(/^([A-Za-z_$][\w$]*)\s*,?$/)
+		if (alias) out.add(alias[1])
+	}
+	if (text.startsWith("{")) {
+		for (const name of extractExportSpecifiers(text.slice(1, -1))) out.add(name)
+	}
+	const defaultImport = text.match(/^([A-Za-z_$][\w$]*)\s*(?:,\s*)?\{/)
+	if (defaultImport) out.add(defaultImport[1])
+	const namespaceImport = text.match(/^\*\s+as\s+([A-Za-z_$][\w$]*)$/)
+	if (namespaceImport) out.add(namespaceImport[1])
+	const bareDefault = text.match(/^([A-Za-z_$][\w$]*)$/)
+	if (bareDefault) out.add(bareDefault[1])
+	return [...out]
+}
+
+function extractExportSpecifiers(specifiers) {
+	const out = new Set()
+	for (const part of specifiers.split(",")) {
+		const chunk = part.trim()
+		if (!chunk) continue
+		const alias = chunk.match(/^([A-Za-z_$][\w$]*)(?:\s+as\s+([A-Za-z_$][\w$]*))?$/)
+		if (!alias) continue
+		out.add(alias[2] ?? alias[1])
+	}
+	return [...out]
+}
+
+// EOF -- vim: set ft=javascript :
