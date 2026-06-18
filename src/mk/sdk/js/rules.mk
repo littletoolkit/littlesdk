@@ -52,6 +52,12 @@ js-info: ## Shows TypeScript project configuratino
 		$(call shell_try,$(JS_RUN) tsc --noEmit --listFiles,Unable to show TypeScript configuration)
 	fi
 
+# Function: js_minify 1:SRC 2:OUT
+# Minifies `SRC` into `OUT` using Bun.
+define js_minify
+	$(BUN) build --minify --outfile="$2" "$1"
+endef
+
 .PHONY: js-bundle
 js-bundle: $(JS_BUNDLE_OUTPUT) ## Creates a minified standalone JS bundle
 	@$(call rule_post_cmd,$(JS_BUNDLE_OUTPUT))

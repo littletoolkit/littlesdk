@@ -7,11 +7,11 @@
 		// SEE: https://yogthos.net/posts/2026-01-16-lattice-mcp.html
 		// Use the installed binary instead of `bun x` to avoid cache and ABI drift.
 		// You can validate this with: opencode mcp list | grep lattice
-		"lattice": {
-			"type": "local",
-			"command": ["lattice-mcp"],
-			"enabled": true
-		},
+		// "lattice": {
+		// 	"type": "local",
+		// 	"command": ["lattice-mcp"],
+		// 	"enabled": true
+		// },
 		"playwright": {
 			"type": "local",
 			"command": [
