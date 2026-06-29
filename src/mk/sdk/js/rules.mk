@@ -122,16 +122,9 @@ $(JS_DIST_PATH)/%.js: src/js/%.js
 # Convert JS_BUNDLE_EXTERNAL space-separated list to --external flags
 JS_BUNDLE_EXTERNAL_FLAGS=$(foreach M,$(JS_BUNDLE_EXTERNAL),--external '$M')
 
-# Extract icons from source files and fetch from Iconify API
-$(JS_BUNDLE_ICONS_OUTPUT): $(JS_BUNDLE_ICONS_SOURCES)
-	@$(call rule_pre_cmd)
-	@mkdir -p $(dir $@)
-	$(SDK_PATH)/bin/sdk-extract-icons $(JS_BUNDLE_ICONS_SOURCES) > $@
-
-# Build the standalone bundle (depends on icons extraction)
 # NOTE: We use --outdir instead of --outfile because some dependencies (like loro-crdt)
 # include WASM files that get extracted as separate assets during bundling.
-$(JS_BUNDLE_OUTPUT): $(JS_BUNDLE_ENTRY) $(SOURCES_TS) $(JS_BUNDLE_ICONS_OUTPUT)
+$(JS_BUNDLE_OUTPUT): $(JS_BUNDLE_ENTRY) $(SOURCES_TS) $(SOURCES_JS)
 	@$(call rule_pre_cmd)
 	if [ -z "$(JS_BUNDLE_ENTRY)" ]; then \
 		echo "$(call fmt_error,JS_BUNDLE_ENTRY not set. Set it to your entry point.)"; \
@@ -152,7 +145,7 @@ $(JS_BUNDLE_OUTPUT): $(JS_BUNDLE_ENTRY) $(SOURCES_TS) $(JS_BUNDLE_ICONS_OUTPUT)
 	fi
 
 # Build the debug bundle (no minification, preserves symbols for debugging)
-$(JS_BUNDLE_DEBUG_OUTPUT): $(JS_BUNDLE_ENTRY) $(SOURCES_TS) $(JS_BUNDLE_ICONS_OUTPUT)
+$(JS_BUNDLE_DEBUG_OUTPUT): $(JS_BUNDLE_ENTRY) $(SOURCES_TS) $(SOURCES_JS)
 	@$(call rule_pre_cmd)
 	@if [ -z "$(JS_BUNDLE_ENTRY)" ]; then \
 		echo "$(call fmt_error,JS_BUNDLE_ENTRY not set. Set it to your entry point.)"; \

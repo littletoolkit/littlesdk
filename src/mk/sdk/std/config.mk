@@ -1,6 +1,6 @@
 # --
 # Project name (defaults to current directory name)
-PROJECT?=$(notdir $(CURDIR))
+PROJECT?=$(firstword $(subst ., ,$(notdir $(CURDIR))))
 COMPONENT?=main
 TENANCY?=default
 ENVIRONMENT?=local
