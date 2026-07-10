@@ -7,9 +7,9 @@
 # --
 # Validation
 
-OPENCODE_EXTRA:=$(filter-out $(OPENCODE_PREP_ALL),$(sort $(shell for V in .opencode/agents/* .opencode/rules/* .opencode/skills/*/*; do [ -e "$$V" ] || continue; [ -L "$$V" ] || continue; T=$$(readlink -f "$$V" 2>/dev/null || true); [[ "$$T" == "$(SDK_PATH)/etc/opencode/"* ]] && printf '%s\n' "$$V"; done)))
+OPENCODE_EXTRA:=$(filter-out $(OPENCODE_PREP_ALL),$(sort $(shell for V in .opencode/agents/* .opencode/rules/* .opencode/skills/*/* .agents/skills/*/*; do [ -e "$$V" ] || continue; [ -L "$$V" ] || continue; T=$$(readlink -f "$$V" 2>/dev/null || true); [[ "$$T" == "$(SDK_PATH)/etc/opencode/"* || "$$T" == "$(abspath deps)"/*/docs/skills/* ]] && printf '%s\n' "$$V"; done)))
 ifneq ($(OPENCODE_EXTRA),)
-$(info [OPC] Removing extra opencode SDK files: $(RED)$(shell for V in $(OPENCODE_EXTRA); do echo "$$V ";unlink "$$V"; done)$(RESET))
+$(info [OPC] Removing extra managed OpenCode files: $(RED)$(shell for V in $(OPENCODE_EXTRA); do echo "$$V ";unlink "$$V"; done)$(RESET))
 OPENCODE_EXTRA:=
 endif
 
@@ -66,10 +66,32 @@ $(PATH_RUN_TASK)/opencode-setup.task: $(PATH_RUN_TASK)/opencode-install.task ope
 	@touch "$@"
 	@$(call rule_post_cmd)
 
+# NOTE: That's mostly for skills
+.agents/%: $(SDK_PATH)/etc/opencode/%
+	@$(call rule_pre_cmd)
+	mkdir -p $(dir $@)
+	ln -sfr $< $@
+	$(call rule_post_cmd)
+
 .opencode/%: $(SDK_PATH)/etc/opencode/%
 	@$(call rule_pre_cmd)
 	mkdir -p $(dir $@)
 	ln -sfr $< $@
 	$(call rule_post_cmd)
 
+define opencode_skill_dep
+.opencode/skills/$(notdir $1)/%: $1/%
+	@$$(call rule_pre_cmd)
+	mkdir -p $$(dir $$@)
+	ln -sfr $$< $$@
+	$$(call rule_post_cmd)
+
+.agents/skills/$(notdir $1)/%: $1/%
+	@$$(call rule_pre_cmd)
+	mkdir -p $$(dir $$@)
+	ln -sfr $$< $$@
+	$$(call rule_post_cmd)
+endef
+
+$(foreach V,$(OPENCODE_SKILLS_DEPS),$(eval $(call opencode_skill_dep,$V)))
 # EOF

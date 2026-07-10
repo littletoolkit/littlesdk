@@ -18,14 +18,9 @@ BUILD_HTML=\
 BUILD_XML=\
 	$(SOURCES_XML:$(PATH_SRC)/xml/%.xml=$(PATH_BUILD)/xml/%.html)
 
-# CSS from JS: Compiled CSS from src/css/*.js to build/css/*.css
-BUILD_CSS_JS=\
-	$(SOURCES_CSS_JS:$(PATH_SRC)/css/%.js=$(PATH_BUILD)/css/%.css)
-
 WWW_BUILD_ALL=\
 	$(BUILD_HTML)\
-	$(BUILD_XML)\
-	$(BUILD_CSS_JS)
+	$(BUILD_XML)
 
 BUILD_ALL+=$(WWW_BUILD_ALL)
 
@@ -38,8 +33,6 @@ WWW_RUN_ALL+=\
 	$(SOURCES_XML:$(PATH_SRC)/xml/%.xml=$(PATH_RUN)/%.xml)\
 	$(SOURCES_XSLT:$(PATH_SRC)/xslt/%.xslt=$(PATH_RUN)/lib/xslt/%.xslt)\
 	$(SOURCES_CSS:$(PATH_SRC)/css/%.css=$(PATH_RUN)/lib/css/%.css)\
-	$(SOURCES_CSS_JS:$(PATH_SRC)/css/%.js=$(PATH_RUN)/lib/css/%.js)\
-	$(SOURCES_CSS_JS:$(PATH_SRC)/css/%.js=$(PATH_RUN)/lib/css/%.css)\
 	$(SOURCES_JS:$(PATH_SRC)/js/%.js=$(PATH_RUN)/lib/js/%.js)\
 	$(SOURCES_TS:$(PATH_SRC)/ts/%.ts=$(PATH_RUN)/lib/js/%.js)\
 	$(SOURCES_JSON:$(PATH_SRC)/json/%.json=$(PATH_RUN)/lib/json/%.json)
@@ -66,10 +59,6 @@ WWW_DIST_JS=\
 # CSS: copy from src/css to dist/www/lib/css
 WWW_DIST_CSS=\
 	$(SOURCES_CSS:$(PATH_SRC)/css/%.css=$(PATH_DIST_WWW)/lib/css/%.css)
-
-# CSS from JS: from build/css (compiled) to dist/www/lib/css
-WWW_DIST_CSS_JS=\
-	$(SOURCES_CSS_JS:$(PATH_SRC)/css/%.js=$(PATH_DIST_WWW)/lib/css/%.css)
 
 # JSON: copy from src/json to dist/www/lib/json
 WWW_DIST_JSON=\
@@ -120,7 +109,6 @@ WWW_DIST_ALL=\
 	$(WWW_DIST_XML)\
 	$(WWW_DIST_JS)\
 	$(WWW_DIST_CSS)\
-	$(WWW_DIST_CSS_JS)\
 	$(WWW_DIST_JSON)\
 	$(WWW_DIST_DATA)\
 	$(WWW_DIST_STATIC)\

@@ -55,6 +55,18 @@ dist: $(PREP_ALL) $(DIST_ALL)
 	@$(call rule_post_cmd)
 	mkdir -p "$(PATH_DIST)"
 
+.PHONY: info
+info:
+	@echo "
+	PROJECT     : $(PROJECT)
+	COMPONENT   : $(COMPONENT)
+	TENANCY     : $(TENANCY)
+	ENVIRONMENT : $(ENVIRONMENT)
+	DEPLOYMENT  : $(DEPLOYMENT)
+	TIMESTAMP   : $(TIMESTAMP)
+	REVISION    : $(REVISION)
+	"
+
 # Reusable function for creating compressed archives
 # Parameters:
 #   $1 = target archive file
