@@ -164,7 +164,7 @@ tool-install-deb-%: $(PATH_RUN_TASK)/install-deb-%.task ## Installs the DEB pack
 $(PATH_RUN_TASK)/install-deb-%.task: ## Installs a DEB package
 	@mkdir -p "$(dir $@)"
 	$(call sh_tool_package_find,$*,deb)
-	if [ -z "$$PACKAGE_VERSION" ; then
+	if [ -z "$$PACKAGE_VERSION" ]; then
 		echo "$(call fmt_message,[TLS] Installing DEB package: $$PACKAGE_NAME)"
 		sudo apt-get update && sudo apt-get install -y "$$PACKAGE_NAME"
 	else

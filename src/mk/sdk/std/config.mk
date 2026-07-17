@@ -114,6 +114,7 @@ ENV_PYTHONPATH=$(realpath $(PATH_SRC)/py):$(DEPS_PYTHONPATH):$(BASE_PYTHONPATH)
 # ## Sources
 SOURCES_JS=$(call file_find,$(PATH_SRC)/js,*.js) ## List of JavaScript sources
 SOURCES_TS=$(call file_find,$(PATH_SRC)/ts,*.ts) ## List of JavaScript sources
+SOURCES_CLS=$(call file_find,$(PATH_SRC)/cljs,*.cljs) ## List of ClojureScript sources
 SOURCES_PY=$(call file_find,$(PATH_SRC)/py,*.py) ## List of Python sources
 SOURCES_MK=$(call file_find,$(PATH_SRC)/mk,*.mk) ## List of Makefile sources
 SOURCES_HTML=$(call file_find,$(PATH_SRC)/html,*.html) ## List of HTML sources
@@ -146,7 +147,7 @@ TESTS_SH=$(call file_find,$(PATH_TESTS),*.test.sh) ## List of shell tests
 TESTS_ALL?=$(foreach _,JS TS PY SH,$(TESTS_$_)) ## All test files
 
 ifeq ($(SOURCES_ALL),)
-SOURCES_ALL+=$(foreach _,JS TS PY HTML CSS CSS_JS XML XSLT,$(SOURCES_$_))
+SOURCES_ALL+=$(foreach _,JS TS CLS PY HTML CSS CSS_JS XML XSLT,$(SOURCES_$_))
 endif
 
 # --

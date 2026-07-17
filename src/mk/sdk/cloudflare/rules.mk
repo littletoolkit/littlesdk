@@ -11,7 +11,7 @@ cloudflare-deploy-pages: build/cloudflare-deploy-pages.task ## Deploys Cloudlare
 build/cloudflare-deploy-pages.task: build/cloudflare-login-wrangler.task
 	@$(CLOUDFLARE_WRANGLER) pages deploy $(CLOUDFLARE_PAGES_PATH)  && touch "$@"
 
-build/cloudflare-login-wrangler.task: build/install-node-wrangler.task ## DEV: Installs and login Wrangler
+build/cloudflare-login-wrangler.task: build/install-node-module-wrangler.task ## DEV: Installs and login Wrangler
 	@mkdir -p "$(dir $@)"
 	$(CLOUDFLARE_WRANGLER) login  && touch "$@"
 

@@ -235,7 +235,7 @@ tf-lint: $(PATH_RUN_TASK)/tf-lint.task
 $(PATH_RUN_TASK)/tf-lint.task: $(SOURCES_TF)
 	@
 	mkdir -p "$(dir $@)" ; date > "$@"
-	$(call tf_run,$*,fmt -check -recursive $(SOURCES_TF)) | tee "$@"
+	$(call tf_run,$(TERRAFORM_WORKSPACE),fmt -check -recursive $(SOURCES_TF)) | tee "$@"
 
 .PHONY: tf-fmt
 tf-fmt: $(PATH_RUN_TASK)/tf-fmt.task ## Formats the terraform sources
@@ -244,7 +244,7 @@ tf-fmt: $(PATH_RUN_TASK)/tf-fmt.task ## Formats the terraform sources
 tf-fmt:
 $(PATH_RUN_TASK)/tf-fmt.task: $(SOURCES_TF)
 	mkdir -p "$(dir $@)" ; date > "$@"
-	@$(call tf_run,$*,fmt -recursive $(SOURCES_TF)) | tee "$@"
+	@$(call tf_run,$(TERRAFORM_WORKSPACE),fmt -recursive $(SOURCES_TF)) | tee "$@"
 
 # =============================================================================
 # DESTROY
@@ -253,7 +253,7 @@ $(PATH_RUN_TASK)/tf-fmt.task: $(SOURCES_TF)
 tf-destroy-plan: tf-destroy-plan@$(TERRAFORM_WORKSPACE) ## Shows plan for deprovisioning Terraform resources
 	@
 
-tf-destroy-plan@%: tf-destroy-plan@% ##  … for the given workspace
+tf-destroy-plan@%: tf-workspace@% ##  … for the given workspace
 	@$(call tf_run,$*,plan -input=false -destroy$(if $(call is_true,$(TERRAFORM_INTERACTIVE)),,-auto-approve))
 
 tf-destroy: tf-destroy@$(TERRAFORM_WORKSPACE) ## Deprovisioning Terraform resources

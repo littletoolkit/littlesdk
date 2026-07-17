@@ -217,9 +217,9 @@ help-vars: ## Shows available configuration variables
 .PHONY: clean
 clean: ## Cleans the project, removing build and run files
 	@$(call rule_pre_cmd)
-	for dir in build run dist $(CLEAN_ALL); do
+	for dir in "$(PATH_BUILD)" "$(PATH_RUN)" "$(PATH_DIST)" $(CLEAN_ALL); do
 		if [ -d "$$dir" ]; then
-			[ "$$dir" = "dist" ] && chmod -R u+w "$$dir" 2>/dev/null || true
+			[ "$$dir" = "$(PATH_DIST)" ] && chmod -R u+w "$$dir" 2>/dev/null || true
 			count=$$(find $$dir -name '*' | wc -l)
 			echo "$(call fmt_action,[STD] Cleaning up directory: $(call fmt_path,$$dir)) $(call fmt_count,$$count)"
 			rm -rf "$$dir"

@@ -216,11 +216,12 @@ function test-step {
 # Function: test-cmd COMMAND…
 # Runs the command and fails the test if the command fails.
 function test-cmd {
-	if ! "$@"; then
-		test-fail "Subcommand failed [$?]: $(test_fmt_line "$*")"
-		return 1
-	else
+	if "$@"; then
 		return 0
+	else
+		local exit_code=$?
+		test-fail "Subcommand failed [$exit_code]: $(test_fmt_line "$*")"
+		return "$exit_code"
 	fi
 }
 
@@ -379,7 +380,7 @@ function test-substring { # STRING STRING…
 function test-contains { # PATH STRING…
 	local path="$1"
 	shift
-	if [ -e "$path" ]; then
+	if [ ! -e "$path" ]; then
 		test-fail "Path $(test-relpath "$path") does not exist"
 		return 1
 	else

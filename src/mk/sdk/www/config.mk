@@ -51,10 +51,10 @@ WWW_DIST_HTML=\
 WWW_DIST_XML=\
 	$(SOURCES_XML:$(PATH_SRC)/xml/%.xml=$(PATH_DIST_WWW)/%.html)
 
-# JS/TS: reuse JS module build outputs (BUILD_JS -> dist/www/lib/js)
+# JS/TS: reuse JS module build outputs (JS_BUILD_ALL -> dist/www/lib/js)
 # Only included if WWW_DIST_MODE contains "js:module"
 WWW_DIST_JS=\
-	$(if $(findstring js:module,$(WWW_DIST_MODE)),$(patsubst $(JS_BUILD_PATH)/%,$(PATH_DIST_WWW)/lib/js/%,$(BUILD_JS)))
+	$(if $(findstring js:module,$(WWW_DIST_MODE)),$(patsubst $(JS_BUILD_PATH)/%,$(PATH_DIST_WWW)/lib/js/%,$(JS_BUILD_ALL)))
 
 # CSS: copy from src/css to dist/www/lib/css
 WWW_DIST_CSS=\

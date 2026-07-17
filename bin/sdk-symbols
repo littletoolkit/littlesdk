@@ -1,4 +1,4 @@
-#!/usr/bin/env -S mise x -- usage exec node
+#!/usr/bin/env -S mise exec usage@3.4.0 -- usage exec node
 // File: sdk-symbols
 // Lists declared symbols as PATH;TYPE;NAME for diffing.
 

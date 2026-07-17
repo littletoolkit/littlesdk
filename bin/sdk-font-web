@@ -34,10 +34,6 @@ def parse_font_name(name: str) -> tuple[str, str, str]:
 	styles = styles.lower()
 	weight = "normal"
 	style = "normal"
-	if "bold" in styles:
-		weight = "700"
-	if "heavy" in styles:
-		weight = "800"
 	if "extraheavy" in styles:
 		weight = "900"
 	elif "extrabold" in styles:
@@ -48,6 +44,8 @@ def parse_font_name(name: str) -> tuple[str, str, str]:
 		weight = "900"
 	elif "ultrablack" in styles:
 		weight = "900"
+	elif "heavy" in styles:
+		weight = "800"
 	elif "black" in styles:
 		weight = "800"
 	elif "semibold" in styles:
@@ -72,6 +70,8 @@ def parse_font_name(name: str) -> tuple[str, str, str]:
 		weight = "100"
 	elif "ultralight" in styles:
 		weight = "100"
+	elif "bold" in styles:
+		weight = "700"
 	if "italic" in styles:
 		style = "italic"
 	if "oblique" in styles:
