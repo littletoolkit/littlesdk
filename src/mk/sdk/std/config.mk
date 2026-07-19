@@ -134,6 +134,11 @@ SDK_ETCFILES=$(filter-out $(SDK_PATH)/etc/opencode $(SDK_PATH)/etc/opencode/% $(
 PREP_SDK=\
 	$(SDK_DOTFILES:$(SDK_PATH)/etc/_%=.%)\
 	$(SDK_ETCFILES:$(SDK_PATH)/etc/%=%)
+
+# `.ruff.toml` is only relevant to projects that ship Python sources.
+PREP_SDK:=$(filter-out .ruff.toml,$(PREP_SDK))
+PREP_SDK+=$(if $(strip $(SOURCES_PY)),.ruff.toml)
+
 PREP_SDK_FILE=$(foreach F,$(PREP_SDK),$(if $(wildcard $F/*),DIR=$F,NOTDIR=$F))
 
 PREP_ALL+=$(PREP_SDK)

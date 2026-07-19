@@ -15,8 +15,8 @@ endif
 
 # --
 # Function: opencode_check
-# Validates that OpenCode is installed and has the Lattice MCP configured.
-# Returns: Exits with an error when OpenCode, the Lattice MCP, or the helper binary is unavailable
+# Validates that the OpenCode CLI is installed.
+# Returns: Exits with an error when the OpenCode CLI is unavailable
 define opencode_check
 	@if ! command -v opencode >/dev/null 2>&1; then
 		echo "$(call fmt_error,[OPC] OpenCode CLI is not available in PATH)"
@@ -31,12 +31,12 @@ endef
 # -----------------------------------------------------------------------------
 
 .PHONY: opencode-check
-opencode-check: ## Validates OpenCode and Lattice MCP configuration
+opencode-check: ## Validates the OpenCode CLI installation
 	@$(call rule_pre_cmd)
 	$(call opencode_check)
 	@$(call rule_post_cmd)
 
-.PHONY: opencode-check
+.PHONY: opencode-list
 opencode-list: ## Shows open code options
 	@
 	echo "$(BOLD)OPENCODE_SKILL   $(GREEN)$(if $(OPENCODE_SKILLS), [$(OPENCODE_SKILLS)], $(RESET)$(RED)[none]$(RESET)) -- $(OPENCODE_SKILLS_AVAILABLE)$(RESET)"

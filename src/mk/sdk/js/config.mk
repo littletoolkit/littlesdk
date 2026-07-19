@@ -53,9 +53,9 @@ JS_DIST_ALL=\
 	$(if $(JS_BUNDLE_ENTRY),,$(patsubst src/js/%,$(JS_DIST_PATH)/%,$(filter src/js/%,$(SOURCES_JS))))\
 	$(if $(JS_BUNDLE_ENTRY),,$(patsubst src/ts/%.ts,$(JS_DIST_PATH)/%.js,$(filter src/ts/%,$(SOURCES_TS))))
 
-JS_TEST_ALL+=$(if $(TESTS_JS)$(TESTS_TS),js-test)
-JS_CHECK_ALL+=$(if $(SOURCES_JS)$(SOURCES_TS),js-check)
-JS_FMT_ALL+=$(if $(SOURCES_JS)$(SOURCES_TS),js-fmt)
+JS_TEST_ALL+=$(if $(strip $(TESTS_JS)$(TESTS_TS)),js-test)
+JS_CHECK_ALL+=$(if $(strip $(SOURCES_JS)$(SOURCES_TS)),js-check)
+JS_FMT_ALL+=$(if $(strip $(SOURCES_JS)$(SOURCES_TS)),js-fmt)
 
 
 # Backwards-compatible alias for build outputs

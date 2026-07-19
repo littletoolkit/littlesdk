@@ -170,7 +170,6 @@ help: ## This command
 	$(call fmt_rule,run)      ― Runs the project and its dependencies
 	$(call fmt_rule,dist)     ― Creates distributions of the project
 	$(call fmt_rule,deploy)   ― Deploys the project on an infrastructure
-	$(call fmt_rule,release)  ― Finalise a deployment so that it is in production
 	―
 	$(call fmt_rule,check)    ― Lints, audits and formats the code
 	$(call fmt_rule,test)     ― Runs tests

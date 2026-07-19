@@ -14,10 +14,10 @@ BANDIT_OPTS?=
 
 DIST_PY=$(SOURCES_PY:$(PATH_SRC)/py/%.py=$(PATH_DIST)/lib/py/%.py)
 PREP_ALL+=$(foreach M,$(USE_PYTHON),build/install-python-$M.task)
-TEST_ALL+=$(if $(TESTS_PY),py-test)
-CHECK_ALL+=$(if $(SOURCES_PY),py-check)
-AUDIT_ALL+=$(if $(SOURCES_PY),py-audit)
-FMT_ALL+=$(if $(SOURCES_PY),py-fmt)
+TEST_ALL+=$(if $(strip $(TESTS_PY)),py-test)
+CHECK_ALL+=$(if $(strip $(SOURCES_PY)),py-check)
+AUDIT_ALL+=$(if $(strip $(SOURCES_PY)),py-audit)
+FMT_ALL+=$(if $(strip $(SOURCES_PY)),py-fmt)
 DIST_ALL+=$(DIST_PY)
 
 # --

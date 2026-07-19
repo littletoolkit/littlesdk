@@ -193,8 +193,15 @@ $(PATH_RUN_TASK)/install-brew-%.task:  ## Installs the DEB package from TOOLS_WH
 
 $(PATH_RUN_TASK)/git-deps-checkout.task: $(wildcard .gitdeps .jjdeps) $(PATH_RUN)/bin/git-deps
 	@mkdir -p "$(dir $@)"
-	$(PATH_RUN)/bin/git-deps checkout
-	touch "$@"
+	# --missing clones absent dependencies without touching existing checkouts
+	# (dirty, detached or symlinked to a development tree), which otherwise make
+	# a forced branch checkout fail `make run` on an already-ready tree.
+	@help="$$($(PATH_RUN)/bin/git-deps checkout --help 2>&1 || true)"; \
+	case "$$help" in \
+		*--missing*) $(PATH_RUN)/bin/git-deps checkout --missing ;; \
+		*) $(PATH_RUN)/bin/git-deps checkout ;; \
+	esac
+	@touch "$@"
 
 # -----------------------------------------------------------------------------
 # TASKS
