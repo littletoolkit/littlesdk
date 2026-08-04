@@ -121,7 +121,7 @@ endef
 # -----------------------------------------------------------------------------
 
 use_cmd=$1
-use_env=$(foreach E,$(if $1,$1 $2 $3 $4 $5 $6,PATH PYTHONPATH),export $E=$(ENV_$E);)
+use_env=$(foreach E,$(if $1,$1 $2 $3 $4 $5 $6,PATH PYTHONPATH),export $E="$(ENV_$E)";)
 use_cli=$(foreach M,$1 $2 $3 $4 $5 $6 $7,build/cli-$M.task)
 
 # -----------------------------------------------------------------------------

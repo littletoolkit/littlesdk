@@ -58,6 +58,9 @@ JS_CHECK_ALL+=$(if $(SOURCES_JS)$(SOURCES_TS),js-check)
 JS_FMT_ALL+=$(if $(SOURCES_JS)$(SOURCES_TS),js-fmt)
 
 
+# Backwards-compatible alias for build outputs
+BUILD_JS?=$(JS_BUILD_ALL)
+
 # Bindings to the main build system
 PREP_ALL+=$(JS_PREP_ALL)
 BUILD_ALL+=$(JS_BUILD_ALL)

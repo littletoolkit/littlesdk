@@ -26,6 +26,8 @@ endif
 # Version of SDK to use (branch, tag, or commit)
 SDK_VERSION=main
 
+.ONESHELL:
+
 # Shell for recipe execution
 SHELL:=bash
 
@@ -36,7 +38,7 @@ SDK_PATH:=$(subst //,,$(dir $(lastword $(MAKEFILE_LIST)))/)
 SDK_FLAGS?=
 
 ifeq ($(filter no-check-version,$(SDK_FLAGS)),)
-SDK_VERSION_CHECK:=$(strip $(shell env MAKEFLAGS="--silent" make -f $(SDK_PATH)/setup.mk check-version SDK_FLAGS=no-check-version))
+SDK_VERSION_CHECK:=$(strip $(shell env MAKEFLAGS="--silent" $(MAKE) -f $(SDK_PATH)/setup.mk check-version SDK_FLAGS=no-check-version))
 $(if $(SDK_VERSION_CHECK),$(info $(SDK_VERSION_CHECK)))
 include $(SDK_PATH)/src/mk/sdk.mk
 endif
@@ -52,8 +54,7 @@ endif
 
 .PHONY: check-version
 check-version: ## Checks the version of SDK against expected version
-	@
-	if [ "$(filter no-check-version,$(SDK_FLAGS))" == "" ]; then
+	@if [ "$(filter no-check-version,$(SDK_FLAGS))" = "" ]; then
 		this_version=$$(git -C $(SDK_PATH) rev-parse HEAD 2>/dev/null || true)
 		that_version=$$(git -C $(SDK_PATH) rev-parse $(SDK_VERSION) 2>/dev/null || true)
 		if [ -z "$$this_version" ] || [ -z "$$that_version" ]; then
@@ -66,5 +67,4 @@ check-version: ## Checks the version of SDK against expected version
 		fi
 	fi
 
-.ONESHELL:
 # EOF
